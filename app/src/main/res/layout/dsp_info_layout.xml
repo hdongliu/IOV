@@ -1,0 +1,564 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/rootblock_default_bg"
+    android:orientation="horizontal"
+    android:paddingBottom="5dp"
+    android:paddingLeft="5dp"
+    android:paddingRight="5dp"
+    android:paddingTop="5dp" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/map_key"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="显示KEY是否正确" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="230dp"
+            android:orientation="horizontal" >
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="220dp"
+                android:layout_weight="1"
+                android:background="#00000000" >
+ <!-- 透明的 -->
+
+                <LinearLayout
+                    android:id="@+id/obd"
+                    android:layout_width="400dp"
+                    android:layout_height="wrap_content"
+                    android:background="@color/white"
+                    android:orientation="vertical" >
+
+                    <RelativeLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/title_bar"
+                        android:orientation="vertical" >
+
+                        <Button
+                            android:id="@+id/obdreturn_btn"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_marginLeft="10dip"
+                            android:background="@drawable/selector_btn_back"
+                            android:gravity="center_horizontal|center_vertical"
+                            android:text="返回"
+                            android:textColor="#ffffff"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/textView2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:text="车身信息"
+                            android:textColor="@color/white"
+                            android:textSize="20.0sp" />
+                    </RelativeLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10.0dip"
+                        android:layout_marginRight="10.0dip"
+                        android:layout_marginTop="5dip"
+                        android:background="@drawable/shape_bg"
+                        android:orientation="vertical" >
+
+                        <TableRow
+                            android:id="@+id/row0"
+                            android:layout_width="fill_parent"
+                            android:layout_height="46dp"
+                            android:layout_weight="1" >
+
+                            <TextView
+                                android:layout_width="40dip"
+                                android:layout_height="fill_parent"
+                                android:layout_weight="2"
+                                android:drawableLeft="@drawable/pic_battery"
+                                android:text="电池电压:"
+                                android:textColor="#ff545454"
+                                android:textSize="17sp" />
+
+                            <TextView
+                                android:id="@+id/obd_tv_vbat"
+                                android:layout_width="40dip"
+                                android:layout_height="fill_parent"
+                                android:layout_weight="1"
+                                android:gravity="center_horizontal|center_vertical"
+                                android:textColor="#ff545454"
+                                android:textSize="17sp" />
+
+                            <TextView
+                                android:layout_width="40dip"
+                                android:layout_height="fill_parent"
+                                android:layout_weight="2"
+                                android:drawableLeft="@drawable/pic_motor"
+                                android:text="发动机转速:"
+                                android:textColor="#ff545454"
+                                android:textSize="17sp" />
+
+                            <TextView
+                                android:id="@+id/obd_tv_rpm"
+                                android:layout_width="40dip"
+                                android:layout_height="fill_parent"
+                                android:layout_weight="1"
+                                android:gravity="center_horizontal|center_vertical"
+                                android:textColor="#ff545454"
+                                android:textSize="17sp" />
+                        </TableRow>
+
+                        <View
+                            android:layout_width="fill_parent"
+                            android:layout_height="2.0px"
+                            android:background="@drawable/shape_line" />
+
+                        <LinearLayout
+                            android:layout_width="fill_parent"
+                            android:layout_height="46dp"
+                            android:orientation="horizontal" >
+
+                            <TableRow
+                                android:id="@+id/row1"
+                                android:layout_width="fill_parent"
+                                android:layout_height="46dp"
+                                android:layout_weight="1" >
+
+                                <TextView
+                                    android:layout_width="40dip"
+                                    android:layout_height="fill_parent"
+                                    android:layout_weight="2"
+                                    android:drawableLeft="@drawable/pic_speed"
+                                    android:text="SPD车速:"
+                                    android:textColor="#ff545454"
+                                    android:textSize="17sp" />
+
+                                <TextView
+                                    android:id="@+id/obd_tv_spd"
+                                    android:layout_width="40dip"
+                                    android:layout_height="fill_parent"
+                                    android:layout_weight="1"
+                                    android:gravity="center_horizontal|center_vertical"
+                                    android:textColor="#ff545454"
+                                    android:textSize="17sp" />
+
+                                <TextView
+                                    android:layout_width="40dip"
+                                    android:layout_height="fill_parent"
+                                    android:layout_weight="2"
+                                    android:drawableLeft="@drawable/pic_tp"
+                                    android:text="TP节气门开度:"
+                                    android:textColor="#ff545454"
+                                    android:textSize="17sp" />
+
+                                <TextView
+                                    android:id="@+id/obd_tv_tp"
+                                    android:layout_width="40dip"
+                                    android:layout_height="fill_parent"
+                                    android:layout_weight="1"
+                                    android:gravity="center_horizontal|center_vertical"
+                                    android:textColor="#ff545454"
+                                    android:textSize="17sp" />
+                            </TableRow>
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="fill_parent"
+                            android:layout_height="2.0px"
+                            android:background="@drawable/shape_line" />
+
+                        <LinearLayout
+                            android:layout_width="fill_parent"
+                            android:layout_height="40.0dip"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal" >
+
+                            <TableRow
+                                android:id="@+id/row2"
+                                android:layout_width="fill_parent"
+                                android:layout_height="46dp"
+                                android:layout_weight="1" >
+
+                                <TextView
+                                    android:layout_width="40dip"
+                                    android:layout_height="fill_parent"
+                                    android:layout_weight="2"
+                                    android:drawableLeft="@drawable/pic_lod"
+                                    android:text="LOD发动机负荷:"
+                                    android:textColor="#ff545454"
+                                    android:textSize="17sp" />
+
+                                <TextView
+                                    android:id="@+id/obd_tv_lod"
+                                    android:layout_width="40dip"
+                                    android:layout_height="fill_parent"
+                                    android:layout_weight="1"
+                                    android:gravity="center_horizontal|center_vertical"
+                                    android:textColor="#ff545454"
+                                    android:textSize="17sp" />
+
+                                <TextView
+                                    android:layout_width="40dip"
+                                    android:layout_height="fill_parent"
+                                    android:layout_weight="2"
+                                    android:drawableLeft="@drawable/pic_ect"
+                                    android:text="ECT冷却液水温:"
+                                    android:textColor="#ff545454"
+                                    android:textSize="17sp" />
+
+                                <TextView
+                                    android:id="@+id/obd_tv_ect"
+                                    android:layout_width="40dip"
+                                    android:layout_height="fill_parent"
+                                    android:layout_weight="1"
+                                    android:gravity="center_horizontal|center_vertical"
+                                    android:textColor="#ff545454"
+                                    android:textSize="17sp" />
+                            </TableRow>
+
+                            <requestFocus />
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="fill_parent"
+                            android:layout_height="2.0px"
+                            android:background="@drawable/shape_line" />
+
+                        <LinearLayout
+                            android:layout_width="fill_parent"
+                            android:layout_height="40.0dip"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal" >
+
+                            <TableRow
+                                android:id="@+id/row3"
+                                android:layout_width="fill_parent"
+                                android:layout_height="46dp"
+                                android:layout_weight="1" >
+
+                                <TextView
+                                    android:layout_width="40dip"
+                                    android:layout_height="fill_parent"
+                                    android:layout_weight="2"
+                                    android:drawableLeft="@drawable/pic_fli"
+                                    android:text="FLI油箱剩余油量:"
+                                    android:textColor="#ff545454"
+                                    android:textSize="17sp" >
+                                </TextView>
+
+                                <TextView
+                                    android:id="@+id/obd_tv_fli"
+                                    android:layout_width="40dip"
+                                    android:layout_height="fill_parent"
+                                    android:layout_weight="1"
+                                    android:gravity="center_horizontal|center_vertical"
+                                    android:textColor="#ff545454"
+                                    android:textSize="17sp" >
+                                </TextView>
+
+                                <TextView
+                                    android:layout_width="40dip"
+                                    android:layout_height="fill_parent"
+                                    android:layout_weight="2"
+                                    android:drawableLeft="@drawable/pic_mph"
+                                    android:text="MPH瞬时油耗:"
+                                    android:textColor="#ff545454"
+                                    android:textSize="17sp" >
+                                </TextView>
+
+                                <TextView
+                                    android:id="@+id/obd_tv_mph"
+                                    android:layout_width="40dip"
+                                    android:layout_height="fill_parent"
+                                    android:layout_weight="1"
+                                    android:gravity="center_horizontal|center_vertical"
+                                    android:textColor="#ff545454"
+                                    android:textSize="17sp" >
+                                </TextView>
+                            </TableRow>
+
+                            <requestFocus />
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="fill_parent"
+                            android:layout_height="2.0px"
+                            android:background="@drawable/shape_line" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="400dp"
+                android:layout_marginLeft="5dp"
+                android:layout_weight="1"
+                android:background="#00000000" >
+ <!-- 透明的 -->
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal" >
+
+            <LinearLayout
+                android:layout_width="200dp"
+                android:layout_height="140dp"
+                android:layout_weight="1"
+                android:background="#00000000" >
+
+                <RelativeLayout
+                    android:id="@+id/light_layout"
+                    android:layout_width="fill_parent"
+                    android:layout_height="150dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+                    android:background="@drawable/backgroud"
+                    android:visibility="gone" >
+
+                    <ImageView
+                        android:id="@+id/green"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginTop="20dp"
+                        android:visibility="gone"
+                        android:background="@drawable/green" />
+
+                    <ImageView
+                        android:id="@+id/yellow"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="20dp"
+                           android:visibility="gone"
+                        android:background="@drawable/yellow" />
+
+                    <ImageView
+                        android:id="@+id/red"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="20dp"
+                        android:layout_marginTop="20dp"
+                           android:visibility="gone"
+                        android:background="@drawable/red" />
+
+                    <TextView
+                        android:id="@+id/traf_lig_info"
+                        android:layout_width="150dp"
+                        android:layout_height="50dp"
+                        android:layout_alignParentBottom="true"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginBottom="20dp"
+                        android:gravity="center_horizontal" />
+                </RelativeLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="108dp"
+                android:layout_marginLeft="5dp"
+                android:layout_weight="1"
+                android:background="#00000000" >
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal" >
+
+            <LinearLayout
+                android:layout_width="200dp"
+                android:layout_weight="1"
+                android:layout_height="170dp"
+                android:background="#00000000" >
+                <RelativeLayout
+            android:id="@+id/houtai_layout"
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:visibility="gone" >
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                android:orientation="vertical" >
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="50dp"
+                    android:background="@drawable/title_bar"
+                    android:orientation="vertical" >
+
+                    <Button
+                        android:id="@+id/houtaireturn_btn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="10dip"
+                        android:background="@drawable/selector_btn_back"
+                        android:gravity="center_horizontal|center_vertical"
+                        android:text="返回"
+                        android:textColor="#ffffff"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/textView3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:text="信息"
+                        android:textColor="@color/white"
+                        android:textSize="20.0sp" />
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10.0dip"
+                    android:layout_marginRight="10.0dip"
+                    android:layout_marginTop="20.0dip"
+                    android:background="@drawable/shape_bg"
+                    android:orientation="vertical" >
+
+                    <TableRow
+                        android:id="@+id/row4"
+                        android:layout_width="fill_parent"
+                        android:layout_height="46dp"
+                        android:layout_weight="1" >
+
+                        <TextView
+                            android:layout_width="40dip"
+                            android:layout_height="fill_parent"
+                            android:layout_weight="2"
+                            android:drawableLeft="@drawable/thecloud"
+                            android:textColor="#ff545454"
+                            android:textSize="17sp" />
+
+                        <TextView
+                            android:id="@+id/houtai_tv"
+                            android:layout_width="40dip"
+                            android:layout_height="fill_parent"
+                            android:layout_weight="1"
+                            android:gravity="center_horizontal|center_vertical"
+                            android:textColor="#ff545454"
+                            android:textSize="17sp" />
+                    </TableRow>
+
+                    <View
+                        android:layout_width="fill_parent"
+                        android:layout_height="2.0px"
+                        android:background="@drawable/shape_line" />
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="46dp"
+                        android:orientation="horizontal" >
+
+                        <TableRow
+                            android:id="@+id/row5"
+                            android:layout_width="fill_parent"
+                            android:layout_height="46dp"
+                            android:layout_weight="1" >
+
+                            <TextView
+                                android:layout_width="40dip"
+                                android:layout_height="fill_parent"
+                                android:layout_weight="2"
+                                android:drawableLeft="@drawable/rsu"
+                                android:textColor="#ff545454"
+                                android:textSize="17sp" />
+
+                            <TextView
+                                android:id="@+id/mk5_tv"
+                                android:layout_width="40dip"
+                                android:layout_height="fill_parent"
+                                android:layout_weight="1"
+                                android:gravity="center_horizontal|center_vertical"
+                                android:textColor="#ff545454"
+                                android:textSize="17sp" />
+                        </TableRow>
+                    </LinearLayout>
+
+
+                </LinearLayout>
+            </LinearLayout>
+        </RelativeLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_weight="1"
+                android:layout_height="108dp"
+                android:layout_marginLeft="5dp"
+                android:background="#00000000" >
+
+                <Button
+                    android:id="@+id/group"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:background="#00000000"
+                    android:text="" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal" >
+
+            <LinearLayout
+                android:layout_width="300dp"
+                android:layout_height="300dp"
+                android:background="#00000000" >
+                
+                <RelativeLayout
+            android:id="@+id/id_fragment_relative"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true" >
+
+            <fragment
+                android:id="@+id/group_fragment"
+                android:name="com.main.baiduMap.Group"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical|center_horizontal" />
+        </RelativeLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="108dp"
+                android:layout_height="108dp"
+                android:layout_marginLeft="5dp"
+                android:background="#00000000" >
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout> 
+
+</LinearLayout>

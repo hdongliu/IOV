@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <!-- android:layout_width="120dp" -->
+
+
+    <!-- 定义一个listView，它用于显示来自服务器的信息 -->
+
+    <ListView
+        android:id="@+id/textView"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="#FFFFFF"
+        android:divider="#FFFFFF" >
+    </ListView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="7"
+        android:background="@drawable/layout_bg1"
+        android:gravity="bottom"
+        android:orientation="horizontal"
+        android:paddingTop="10dp" >
+
+        <!-- 定义一个文本框，它用于接受用户的输入 -->
+
+        <Button
+            android:id="@+id/soundBtn"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:background="@drawable/chat_send_button_bg"
+            android:text="点击说话" />
+
+        <EditText
+            android:id="@+id/input"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical" />
+
+        <Button
+            android:id="@+id/send"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:background="@drawable/chat_send_button_bg"
+            android:paddingLeft="15dp"
+            android:text="发送" />
+    </LinearLayout>
+
+</LinearLayout>

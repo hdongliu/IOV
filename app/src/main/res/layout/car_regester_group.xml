@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_horizontal|center_vertical"
+    android:background="@color/white"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:orientation="vertical" >
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/title_bar"
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/group_back_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dip"
+                android:background="@drawable/selector_btn_back"
+                android:gravity="center_horizontal|center_vertical"
+                android:text="返回"
+                android:textColor="#ffffff"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="车群组创建"
+                android:textColor="@color/white"
+                android:textSize="20.0sp" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10.0dip"
+            android:layout_marginRight="10.0dip"
+            android:layout_marginTop="20.0dip"
+            android:background="@drawable/shape_bg"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="40.0dip"
+                android:gravity="center_vertical"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="40.0dip"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="right"
+                    android:text="*群组名称："
+                    android:textColor="@android:color/black"
+                    android:textSize="15.0sp" />
+
+                <EditText
+                    android:id="@+id/group_name"
+                    android:layout_width="1px"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10.0dip"
+                    android:layout_marginRight="15.0dip"
+                    android:layout_weight="3"
+                    android:background="@android:color/white"
+                    android:hint="请输入车群组名称"
+                    android:maxLength="20"
+                    android:paddingLeft="10.0dip"
+                    android:textColor="#ff545454"
+                    android:textSize="15.0sp" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="1.0px"
+                android:background="@drawable/shape_line" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="100.0dip"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="50px"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="right"
+                    android:paddingLeft="15.0dip"
+                    android:text="*群组介绍:"
+                    android:textColor="@android:color/black"
+                    android:textSize="15.0sp" />
+
+                <EditText
+                    android:id="@+id/group_introduce"
+                    android:layout_width="1px"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="10.0dip"
+                    android:layout_marginRight="15.0dip"
+                    android:layout_weight="3"
+                    android:background="@android:color/white"
+                    android:hint="请输入群组介绍"
+                    android:inputType="number"
+                    android:maxLength="20"
+                    android:paddingLeft="10.0dip"
+                    android:textColor="#ff545454"
+                    android:textSize="15.0sp" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="1.0px"
+                android:background="@drawable/shape_line" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="40.0dip"
+                android:gravity="center_vertical"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="50px"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="right"
+                    android:paddingLeft="15.0dip"
+                    android:text="*起点："
+                    android:textColor="@android:color/black"
+                    android:textSize="15.0sp" />
+
+                <EditText
+                    android:id="@+id/group_start"
+                    android:layout_width="1px"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10.0dip"
+                    android:layout_marginRight="15.0dip"
+                    android:layout_weight="3"
+                    android:background="@android:color/white"
+                    android:ems="10"
+                    android:hint="请输入路线起点"
+                    android:maxLength="20"
+                    android:paddingLeft="10.0dip"
+                    android:textColor="#ff545454"
+                    android:textSize="15.0sp" >
+                </EditText>
+
+                <requestFocus />
+            </LinearLayout>
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="1.0px"
+                android:background="@drawable/shape_line" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="40.0dip"
+                android:gravity="center_vertical"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="50px"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="right"
+                    android:paddingLeft="15.0dip"
+                    android:text="*终点："
+                    android:textColor="@android:color/black"
+                    android:textSize="15.0sp" />
+
+                <EditText
+                    android:id="@+id/group_end"
+                    android:layout_width="1px"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10.0dip"
+                    android:layout_marginRight="15.0dip"
+                    android:layout_weight="3"
+                    android:background="@android:color/white"
+                    android:ems="10"
+                    android:hint="请输入路线终点"
+                    android:maxLength="20"
+                    android:paddingLeft="10.0dip"
+                    android:textColor="#ff545454"
+                    android:textSize="15.0sp" >
+                </EditText>
+
+                <requestFocus />
+            </LinearLayout>
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="1.0px"
+                android:background="@drawable/shape_line" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="40.0dip"
+                android:gravity="center_vertical"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="50px"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="right"
+                    android:paddingLeft="15.0dip"
+                    android:text="备注:"
+                    android:textColor="@android:color/black"
+                    android:textSize="15.0sp" />
+
+                <EditText
+                    android:id="@+id/group_note"
+                    android:layout_width="1px"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10.0dip"
+                    android:layout_marginRight="15.0dip"
+                    android:layout_weight="3"
+                    android:background="@android:color/white"
+                    android:hint="请再次输入备注"
+                    android:maxLength="20"
+                    android:paddingLeft="10.0dip"
+                    android:textColor="#ff545454"
+                    android:textSize="15.0sp" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="1.0px"
+                android:background="@drawable/shape_line" />
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="1.0px"
+                android:background="@drawable/shape_line" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/creat_btn"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20.0dip"
+            android:layout_marginRight="20.0dip"
+            android:layout_marginTop="10.0dip"
+            android:background="@drawable/op_bg_selector"
+            android:text="创建"
+            android:textColor="#ff000000"
+            android:textSize="15.0sp" />
+    </LinearLayout>
+
+</ScrollView>

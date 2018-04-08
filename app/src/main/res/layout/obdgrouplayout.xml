@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_horizontal|center_vertical"
+    android:background="@color/white"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:orientation="vertical" >
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/title_bar"
+            android:orientation="vertical" >
+
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="OBD 数据显示"
+                android:textColor="@color/white"
+                android:textSize="20.0sp" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10.0dip"
+            android:layout_marginRight="10.0dip"
+            android:layout_marginTop="20.0dip"
+            android:background="@drawable/shape_bg"
+            android:orientation="vertical" >
+
+            <TableRow
+        	android:id="@+id/row0"
+        	android:layout_width="fill_parent"
+        	android:layout_height="46dp"
+        	android:layout_weight="1">
+        		<TextView
+        		android:layout_width="40dip"
+        		android:layout_height="fill_parent"
+        		android:layout_weight="5"
+        		android:textSize="15sp" 
+        		android:text="电池电压:"
+        		android:textColor="#ff545454"
+        		android:drawableLeft="@drawable/pic_battery"
+        		>
+        		</TextView>
+        		<TextView
+        		android:layout_width="40dip"
+        		android:layout_height="fill_parent"
+        		android:layout_weight="3"
+        		android:textSize="25sp" 
+        		android:textColor="#ff545454" 
+        		android:id="@+id/obd_tv_vbat"
+        		>
+        		</TextView>
+        		<TextView
+        		android:layout_width="40dip"
+        		android:layout_height="fill_parent"
+        		android:layout_weight="5"
+        		android:textSize="15sp" 
+        		android:textColor="#ff545454"
+        		android:drawableLeft="@drawable/pic_motor"
+        		android:text="发动机转速:" >
+        		</TextView>
+        		<TextView
+        		android:layout_width="40dip"
+        		android:layout_height="fill_parent"
+        		android:layout_weight="3"
+        		android:textSize="25sp"
+        		android:textColor="#ff545454"  
+        		android:id="@+id/obd_tv_rpm">
+        		</TextView>
+        	</TableRow>
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="2.0px"
+                android:background="@drawable/shape_line" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="46dp"
+                android:orientation="horizontal" >
+
+            <TableRow
+        	android:id="@+id/row1"
+        	android:layout_width="fill_parent"
+        	android:layout_height="46dp"
+        	android:layout_weight="1">
+        		<TextView
+        		android:layout_width="40dip"
+        		android:layout_height="fill_parent"
+        		android:layout_weight="2"
+        		android:textSize="15sp" 
+        		android:text="SPD车速:"
+        		android:textColor="#ff545454"
+        		android:drawableLeft="@drawable/pic_speed"
+        		>
+        		</TextView>
+        		<TextView
+        		android:layout_width="40dip"
+        		android:layout_height="fill_parent"
+        		android:layout_weight="1"
+        		android:textSize="25sp" 
+        		android:textColor="#ff545454" 
+        		android:id="@+id/obd_tv_spd"
+        		>
+        		</TextView>
+        		<TextView
+        		android:layout_width="40dip"
+        		android:layout_height="fill_parent"
+        		android:layout_weight="2"
+        		android:textSize="15sp" 
+        		android:textColor="#ff545454"
+        		android:drawableLeft="@drawable/pic_tp"
+        		android:text="TP节气门开度:" >
+        		</TextView>
+        		<TextView
+        		android:layout_width="40dip"
+        		android:layout_height="fill_parent"
+        		android:layout_weight="1"
+        		android:textSize="25sp"  
+        		android:textColor="#ff545454"
+        		android:id="@+id/obd_tv_tp">
+        		</TextView>
+        	</TableRow>
+            </LinearLayout>
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="2.0px"
+                android:background="@drawable/shape_line" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="40.0dip"
+                android:gravity="center_vertical"
+                android:orientation="horizontal" >
+
+            <TableRow
+        	android:id="@+id/row2"
+        	android:layout_width="fill_parent"
+        	android:layout_height="46dp"
+        	android:layout_weight="1">
+        		<TextView
+        		android:layout_width="40dip"
+        		android:layout_height="fill_parent"
+        		android:layout_weight="2"
+        		android:textSize="15sp" 
+        		android:textColor="#ff545454"
+        		android:drawableLeft="@drawable/pic_lod"
+        		android:text="LOD发动机负荷:"
+        		>
+        		</TextView>
+        		<TextView
+        		android:layout_width="40dip"
+        		android:layout_height="fill_parent"
+        		android:layout_weight="1"
+        		android:textSize="25sp"  
+        		android:textColor="#ff545454"
+        		android:id="@+id/obd_tv_lod"
+        		>
+        		</TextView>
+        		<TextView
+        		android:layout_width="40dip"
+        		android:layout_height="fill_parent"
+        		android:layout_weight="2"
+        		android:textSize="15sp" 
+        		android:drawableLeft="@drawable/pic_ect"
+        		android:textColor="#ff545454"
+        		android:text="ECT冷却液水温:" >
+        		</TextView>
+        		<TextView
+        		android:layout_width="40dip"
+        		android:layout_height="fill_parent"
+        		android:layout_weight="1"
+        		android:textSize="25sp" 
+        		android:textColor="#ff545454" 
+        		android:id="@+id/obd_tv_ect">
+        		</TextView>
+        	</TableRow>
+
+                <requestFocus />
+            </LinearLayout>
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="2.0px"
+                android:background="@drawable/shape_line" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="40.0dip"
+                android:gravity="center_vertical"
+                android:orientation="horizontal" >
+
+            <TableRow
+        	android:id="@+id/row3"
+        	android:layout_width="fill_parent"
+        	android:layout_height="46dp"
+        	android:layout_weight="1">
+        		<TextView
+        		android:layout_width="40dip"
+        		android:layout_height="fill_parent"
+        		android:layout_weight="2"
+        		android:textSize="15sp" 
+        		android:drawableLeft="@drawable/pic_fli"
+        		android:textColor="#ff545454"
+        		android:text="FLI油箱剩余油量:"
+        		>
+        		</TextView>
+        		<TextView
+        		android:layout_width="40dip"
+        		android:layout_height="fill_parent"
+        		android:layout_weight="1"
+        		android:textSize="25sp"  
+        		android:textColor="#ff545454"
+        		android:id="@+id/obd_tv_fli"
+        		>
+        		</TextView>
+        		<TextView
+        		android:layout_width="40dip"
+        		android:layout_height="fill_parent"
+        		android:layout_weight="2"
+        		android:textSize="15sp" 
+        		android:drawableLeft="@drawable/pic_mph"
+        		android:textColor="#ff545454"
+        		android:text="MPH瞬时油耗:" >
+        		</TextView>
+        		<TextView
+        		android:layout_width="40dip"
+        		android:layout_height="fill_parent"
+        		android:layout_weight="1"
+        		android:textSize="25sp"  
+        		android:textColor="#ff545454"
+        		android:id="@+id/obd_tv_mph">
+        		</TextView>
+        	</TableRow>
+                <requestFocus />
+            </LinearLayout>
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="2.0px"
+                android:background="@drawable/shape_line" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="40.0dip"
+                android:gravity="center_vertical"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="50px"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="right"
+                    android:paddingLeft="15.0dip"
+                    android:text="以后留着扩充用:"
+                    android:textColor="@android:color/black"
+                    android:textSize="15.0sp" />
+
+                <EditText
+                    android:id="@+id/reg_password2"
+                    android:layout_width="1px"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10.0dip"
+                    android:layout_marginRight="15.0dip"
+                    android:layout_weight="3"
+                    android:background="@android:color/white"
+                    android:hint="以后留着扩充用"
+                    android:maxLength="20"
+                    android:paddingLeft="10.0dip"
+                    android:textColor="#ff545454"
+                    android:textSize="15.0sp" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="1.0px"
+                android:background="@drawable/shape_line" />
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="1.0px"
+                android:background="@drawable/shape_line" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/obdcreat_btn"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20.0dip"
+            android:layout_marginRight="20.0dip"
+            android:layout_marginTop="10.0dip"
+            android:background="@drawable/op_bg_selector"
+            android:text="返回 MAP界面"
+            android:textColor="#ff000000"
+            android:textSize="15.0sp" />
+    </LinearLayout>
+
+</ScrollView>

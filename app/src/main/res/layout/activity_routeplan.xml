@@ -1,0 +1,424 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/frame_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <RelativeLayout
+        android:id="@+id/map_layout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+        <com.baidu.mapapi.map.MapView
+            android:id="@+id/id_bmapView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="true" />
+
+        <Button
+            android:id="@+id/chat_display_trigger"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/junp_menu" />
+
+        <RelativeLayout
+            android:id="@+id/trans_inner_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="200dp"
+            android:background="#00000000"
+            android:layout_alignParentTop="true" >
+
+            <TextView
+                android:id="@+id/start_location"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@drawable/start_point" />
+             <EditText
+                android:id="@+id/route_start"
+                android:layout_width="200dp"
+                android:layout_height="30dp"
+                android:text=""
+                  android:textSize="9dp"
+                android:layout_toRightOf="@id/start_location" />
+   
+                <TextView
+                android:id="@+id/end_location"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_below="@id/start_location"
+                android:background="@drawable/end_point" />
+
+            <EditText
+                android:id="@+id/route_end"
+                android:layout_width="200dp"
+                android:layout_height="30dp"
+                  android:textSize="9dp"
+                android:layout_below="@id/route_start"
+                android:layout_toRightOf="@id/end_location"
+                android:text="" />
+
+            <Button
+                android:id="@+id/drive"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:onClick="SearchButtonProcess"
+                  android:layout_toRightOf="@id/route_start"
+                android:textSize="9dp"
+                android:text="驾车" />
+            
+              <Button
+                  android:id="@+id/transit"
+                  android:layout_width="wrap_content"
+                  android:layout_height="30dp"
+                  android:layout_below="@id/drive"
+                  android:layout_toRightOf="@id/route_end"
+                  android:onClick="SearchButtonProcess"
+                  android:textSize="9dp"
+                  android:text="公交" />
+
+            <Button
+                android:id="@+id/walk"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_below="@id/end_location"
+                android:onClick="SearchButtonProcess"
+                android:textSize="9dp"
+                android:text="步行" />
+            
+            <Button
+                android:id="@+id/btn_normalmap"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_below="@id/end_location"
+                android:layout_toRightOf="@id/walk"
+                android:onClick="MapTypeControlProcess"
+                android:textSize="9dp"
+                android:text="常用图" />
+            
+             <Button
+                android:id="@+id/btn_satellitemap"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_below="@id/end_location"
+                android:layout_toRightOf="@id/btn_normalmap"
+                android:onClick="MapTypeControlProcess"
+                android:textSize="9dp"
+                android:text="卫星图" />
+             
+              <Button
+                android:id="@+id/btn_trafficmap"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_below="@id/end_location"
+                android:layout_toRightOf="@id/btn_satellitemap"
+                android:onClick="MapTypeControlProcess"
+                android:textSize="9dp"
+                android:text="交通图" />
+              
+               <Button
+                android:id="@+id/btn_hotspotmap"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_below="@id/end_location"
+                android:layout_toRightOf="@id/btn_trafficmap"
+                android:onClick="MapTypeControlProcess"
+                android:textSize="9dp"
+                android:text="热力图" />
+               
+                <Button
+                android:id="@+id/btn_tocenter"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_below="@id/end_location"
+                android:layout_toRightOf="@id/btn_hotspotmap"
+                android:onClick="MapTypeControlProcess"
+                android:textSize="9dp"
+                android:text="自适应" />
+                <TextView
+                android:id="@+id/bus_inquery"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_below="@id/walk"
+                android:background="@drawable/bus_inquery" />
+                
+                <EditText
+                    android:id="@+id/bus_enqury_city"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:layout_below="@id/btn_normalmap"
+                    android:layout_toRightOf="@id/bus_inquery"
+                    android:hint="输入城市"
+                    android:textSize="9dp" />
+                
+                <EditText
+                    android:id="@+id/bus_enqury_busno"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:layout_below="@id/btn_normalmap"
+                    android:layout_toRightOf="@id/bus_enqury_city"
+                    android:hint="输入公交车号"
+                    android:textSize="9dp" />
+                
+                <Button
+                android:id="@+id/btn_bus_inquery"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_below="@id/btn_normalmap"
+                android:layout_toRightOf="@id/bus_enqury_busno"
+                android:onClick="SearchButtonProcess"
+                android:textSize="9dp"
+                android:text="公交查询" />
+
+                <Button
+                    android:id="@+id/btn_location"
+                    android:layout_width="60dp"
+                    android:layout_height="30dp"
+                    android:layout_toRightOf="@id/btn_bus_inquery"
+                    android:layout_below="@id/walk"
+                    android:textSize="9dp" />
+                
+                 <EditText
+                    android:id="@+id/plsname_enqury_city"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:layout_below="@id/bus_inquery"
+                    android:hint="城市"
+                    android:textSize="9dp" />
+                
+                <EditText
+                    android:id="@+id/plsname_enqury_plsname"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:layout_below="@id/bus_enqury_busno"
+                    android:layout_toRightOf="@id/plsname_enqury_city"
+                    android:hint="输入地名"
+                    android:textSize="9dp" />
+                
+                <Button
+                android:id="@+id/btn_plsname_inquery"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_below="@id/btn_bus_inquery"
+                android:layout_toRightOf="@id/plsname_enqury_plsname"
+                android:onClick="SearchButtonProcess"
+                android:textSize="9dp"
+                android:text="地名查询" />
+                
+                <!--  -->
+                 <EditText
+                    android:id="@+id/poi_name"
+                    android:layout_width="90dp"
+                    android:layout_height="30dp"
+                    android:layout_below="@id/btn_bus_inquery"
+                    android:layout_toRightOf="@id/btn_plsname_inquery"
+                    android:hint="兴趣点"
+                    android:textSize="9dp" />
+                
+                <Button
+                android:id="@+id/poi_search_inquery"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_below="@id/btn_bus_inquery"
+                android:layout_toRightOf="@id/poi_name"
+                android:onClick="SearchButtonProcess"
+                android:textSize="9dp"
+                android:text="POI查询" />
+
+            <Button
+                android:id="@+id/close_linner"
+                android:layout_width="30dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_below="@+id/plsname_enqury_city"
+                android:background="@drawable/close" />
+            
+            <TextView android:id="@+id/hand_textview_test"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="hel"
+                android:textSize="20dp"
+                android:layout_below="@id/plsname_enqury_plsname"
+                android:layout_toRightOf="@id/close_linner"/>
+            <!-- TextView写的测试代码，到时候调好了，要删除 -->
+           
+
+        </RelativeLayout>
+        
+           <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignWithParentIfMissing="false"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="false"
+            android:layout_marginBottom="10dip" >
+
+            <Button
+                android:id="@+id/trans_pre"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:layout_weight="1.0"
+                android:background="@drawable/pre_"
+                android:onClick="nodeClick" />
+
+            <Button
+                android:id="@+id/trans_next"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:layout_weight="1.0"
+                android:background="@drawable/next_"
+                android:onClick="nodeClick" />
+        </LinearLayout>
+    </RelativeLayout>
+    
+    <RelativeLayout
+        android:id="@+id/id_marker_info"
+        android:visibility="gone"
+        android:layout_width="fill_parent"
+        android:layout_height="240dp"
+        android:layout_alignParentBottom="true"
+        android:background="#CC4e5a6b"
+        android:clickable="true" >
+		
+       <LinearLayout 
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            
+        <Button 
+            android:id="@+id/navi"
+            android:layout_width="60dp"
+            android:layout_height="150dp"
+            android:layout_gravity="center"
+            android:text="跟上这辆车"/>
+        
+        <Button 
+            android:id="@+id/map_clean"
+            android:layout_width="60dp"
+            android:layout_height="150dp"
+            android:layout_gravity="center"
+            android:text="清地图"/>
+         <ImageView 
+            android:id="@+id/warn_level_iv"
+            android:layout_width="120dp"
+            android:layout_height="150dp"
+            android:layout_gravity="center"
+            android:text=""/>
+        
+          <ImageView
+            android:id="@+id/info_img"
+            android:layout_width="fill_parent"
+            android:layout_height="150dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:layout_marginTop="10dp"
+            android:alpha="1.0"
+            android:background="@drawable/map_image_border_white"
+            android:clickable="true"
+            android:scaleType="fitXY"
+            android:src="@drawable/car" />
+            
+
+
+        </LinearLayout>
+        
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="70dp"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/bg_map_bottom" >
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/info_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="老米家泡馍小炒"
+                    android:textColor="#FFF5EB"
+                    android:textStyle="bold" 
+                    android:textSize="18dp"/>
+
+                <TextView
+                    android:id="@+id/info_distance"
+                    android:layout_width="210dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:text="北京朝阳区北三环北京化工大学北京朝阳区北三环北京化工大学"
+                    android:textColor="#FFF5EB" 
+                    android:textSize="11dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="10dp"
+                android:orientation="vertical" >
+				
+                <LinearLayout 
+                    android:layout_width="wrap_content"
+                	android:layout_height="wrap_content"
+                 	android:orientation="horizontal">   
+                    
+                    <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:text="车辆信息："
+                    android:textSize="14dp"
+                    android:textColor="#FFF5EB" />
+                
+               	 	<TextView
+                    android:id="@+id/car_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:text="null"
+                    android:textSize="14dp"
+                    android:textColor="#FFF5EB" />
+                    
+                </LinearLayout>
+                
+                <LinearLayout 
+                    android:layout_width="wrap_content"
+                	android:layout_height="wrap_content"
+                 	android:orientation="horizontal"
+                 	android:layout_marginTop="9dp">   
+                    
+                    <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:text="ID："
+                    android:textSize="14dp"
+                    android:textColor="#FFF5EB" />
+                
+                	<TextView
+                    android:id="@+id/car_id"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:text="652"
+                    android:textColor="#00FF7F" 
+                    android:textSize="18dp"/>
+                    
+                </LinearLayout>
+                
+            </LinearLayout>
+        </RelativeLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

@@ -1,0 +1,1390 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    
+
+    <RelativeLayout
+        android:id="@+id/map_layout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+        <com.baidu.mapapi.map.MapView
+            android:id="@+id/vtmapView"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" />
+        
+        <Button
+            android:id="@+id/carGroup_trigger"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/cargroup_more" />
+        
+        <!-- 车群组相关的按钮-->
+        <LinearLayout
+			android:id="@+id/carGroup_button"    
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_alignParentTop="true"
+			android:orientation="horizontal" 
+			android:visibility="gone"  >
+			
+			<Button
+			    android:id="@+id/exist_group"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_marginBottom="2dip"
+			    android:layout_marginLeft="2dip"
+			    android:layout_marginRight="2dip"
+			    android:layout_marginTop="2dip"
+			    android:layout_weight="1"
+			    android:padding="10dip"
+			    android:text="车队" />
+			
+			<Button
+			    android:id="@+id/group"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_marginBottom="2dip"
+			    android:layout_marginLeft="2dip"
+			    android:layout_marginRight="2dip"
+			    android:layout_marginTop="2dip"
+			    android:layout_weight="1"
+			    android:padding="10dip"
+			    android:text="创建车队" />
+			
+			<Button
+			    android:id="@+id/delete_group"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_marginBottom="2dip"
+			    android:layout_marginLeft="2dip"
+			    android:layout_marginRight="2dip"
+			    android:layout_marginTop="2dip"
+			    android:layout_weight="1"
+			    android:text="解散群组" />
+			
+			<Button
+			    android:id="@+id/group_invate"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_marginBottom="2dip"
+			    android:layout_marginLeft="2dip"
+			    android:layout_marginRight="2dip"
+			    android:layout_marginTop="2dip"
+			    android:layout_weight="1"
+			    android:text="邀请" />
+			
+			<Button
+			    android:id="@+id/group_member_name_list"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_marginBottom="2dip"
+			    android:layout_marginLeft="2dip"
+			    android:layout_marginRight="2dip"
+			    android:layout_marginTop="2dip"
+			    android:layout_weight="1"
+			    android:text="群组成员名" />
+			
+			<Button
+			    android:id="@+id/cargroup_back"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_marginLeft="2dip"
+			    android:layout_marginTop="2dip"
+			    android:layout_weight="1.15" 
+			    android:background="@drawable/cargroup_back"/>
+			
+        </LinearLayout>
+        
+        
+        <!-- 显示存在的车群组界面 -->
+        <RelativeLayout
+            android:id="@+id/GroupExist_Relative"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="@color/white"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <RelativeLayout
+                android:id="@+id/car_group_title"
+                android:layout_width="fill_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/title_bar"
+                android:orientation="vertical" >
+
+                <Button
+                    android:id="@+id/group_exist_back_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="10dip"
+                    android:background="@drawable/selector_btn_back"
+                    android:gravity="center_horizontal|center_vertical"
+                    android:text="返回"
+                    android:textColor="#ffffff"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="车群组"
+                    android:textColor="@color/white"
+                    android:textSize="20.0sp" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_below="@id/car_group_title"
+                android:orientation="vertical" >
+
+                <ListView
+                    android:id="@+id/car_group_listview"
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:divider="#FFFFFF" >
+                </ListView>
+            </LinearLayout>
+        </RelativeLayout>
+        
+        <Button
+            android:id="@+id/chat_display_trigger"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/junp_menu" />
+
+        <!-- 创建车群组界面 -->
+        <RelativeLayout
+            android:id="@+id/id_fragment_relative"
+            android:layout_width="500dp"
+            android:layout_height="500dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true" >
+
+            <fragment
+                android:id="@+id/group_fragment"
+                android:name="com.main.baiduMap.Group"
+                android:layout_width="500dp"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical|center_horizontal" />
+        </RelativeLayout>
+
+        <!-- 车群组聊天界面 -->
+        <RelativeLayout
+            android:id="@+id/car_group"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:layout_alignParentBottom="true"
+            android:background="@color/white"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <RelativeLayout
+                android:id="@+id/group_title"
+                android:layout_width="fill_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/title_bar"
+                android:orientation="vertical" >
+
+                <Button
+                    android:id="@+id/group_chat_back_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="10dip"
+                    android:background="@drawable/selector_btn_back"
+                    android:gravity="center_horizontal|center_vertical"
+                    android:text="返回"
+                    android:textColor="#ffffff"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="车群组聊天"
+                    android:textColor="@color/white"
+                    android:textSize="20.0sp" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_below="@id/group_title"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:id="@+id/group_linear"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical" >
+
+                    <ListView
+                        android:id="@+id/group_listview"
+                        android:layout_width="fill_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:divider="#FFFFFF" >
+                    </ListView>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="7"
+                        android:background="@drawable/layout_bg1"
+                        android:orientation="horizontal" >
+
+                        <Button
+                            android:id="@+id/group_soundBtn"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="2"
+                            android:background="@drawable/chat_send_button_bg"
+                            android:text="点击说话" />
+
+                        <EditText
+                            android:id="@+id/group_input"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:gravity="center_vertical" />
+
+                        <Button
+                            android:id="@+id/group_send"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="2"
+                            android:background="@drawable/chat_send_button_bg"
+                            android:text="发送" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </RelativeLayout>
+
+        <!-- 添加邀请 界面 -->
+
+        <LinearLayout
+            android:id="@+id/group_invite"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="@color/white"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/title_bar"
+                android:orientation="vertical" >
+
+                <Button
+                    android:id="@+id/group_invite_back_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="10dip"
+                    android:background="@drawable/selector_btn_back"
+                    android:gravity="center_horizontal|center_vertical"
+                    android:text="返回"
+                    android:textColor="#ffffff"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="邀约设置"
+                    android:textColor="@color/white"
+                    android:textSize="20.0sp" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10.0dip"
+                android:layout_marginRight="10.0dip"
+                android:layout_marginTop="20.0dip"
+                android:background="@drawable/shape_bg"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="40.0dip"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal" >
+
+                    <TextView
+                        android:layout_width="40.0dip"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="right"
+                        android:text="车牌号："
+                        android:textColor="@android:color/black"
+                        android:textSize="15.0sp" />
+
+                    <EditText
+                        android:id="@+id/group_invite_name"
+                        android:layout_width="1px"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10.0dip"
+                        android:layout_marginRight="15.0dip"
+                        android:layout_weight="3"
+                        android:background="@android:color/white"
+                        android:hint="请输入车牌号"
+                        android:maxLength="20"
+                        android:paddingLeft="10.0dip"
+                        android:textColor="#ff545454"
+                        android:textSize="15.0sp" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="fill_parent"
+                    android:layout_height="1.0px"
+                    android:background="@drawable/shape_line" />
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="40.0dip"
+                    android:orientation="horizontal" >
+
+                    <TextView
+                        android:layout_width="50px"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="right"
+                        android:paddingLeft="15.0dip"
+                        android:text="用户名:"
+                        android:textColor="@android:color/black"
+                        android:textSize="15.0sp" />
+
+                    <EditText
+                        android:id="@+id/group_invite_user_name"
+                        android:layout_width="1px"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="10.0dip"
+                        android:layout_marginRight="15.0dip"
+                        android:layout_weight="3"
+                        android:background="@android:color/white"
+                        android:hint="请输入车主用户名"
+                        android:maxLength="20"
+                        android:paddingLeft="10.0dip"
+                        android:textColor="#ff545454"
+                        android:textSize="15.0sp" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="fill_parent"
+                    android:layout_height="1.0px"
+                    android:background="@drawable/shape_line" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/group_invite_ok"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20.0dip"
+                android:layout_marginRight="20.0dip"
+                android:layout_marginTop="10.0dip"
+                android:background="@drawable/op_bg_selector"
+                android:text="确定"
+                android:textColor="#ff000000"
+                android:textSize="15.0sp" />
+        </LinearLayout>
+
+        
+        <!-- 防撞预警 -->
+        <LinearLayout
+            android:id="@+id/anti_collision_linearlayout"
+            android:layout_width="130dp"
+            android:layout_height="fill_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentBottom="true"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <ImageView
+                android:id="@+id/anti_collision_imgview"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/green"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/anti_collision_txtview"
+                android:layout_width="150dp"
+                android:layout_height="50dp"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="20dp"
+                android:gravity="center_horizontal" />
+        </LinearLayout>
+        
+        <!-- 消息推送界面 -->
+        <LinearLayout
+            android:id="@+id/msgpush_linearlayout"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="350dp"
+            android:background="@color/white"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <RelativeLayout
+                android:id="@+id/houtai_layout"
+                android:layout_width="350dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:visibility="gone" >
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/white"
+                    android:orientation="vertical" >
+
+                    <RelativeLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/title_bar"
+                        android:orientation="vertical" >
+
+                        <Button
+                            android:id="@+id/houtaireturn_btn"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_marginLeft="10dip"
+                            android:background="@drawable/selector_btn_back"
+                            android:gravity="center_horizontal|center_vertical"
+                            android:text="返回"
+                            android:textColor="#ffffff"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/textView3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:text="信息"
+                            android:textColor="@color/white"
+                            android:textSize="20.0sp" />
+                    </RelativeLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10.0dip"
+                        android:layout_marginRight="10.0dip"
+                        android:layout_marginTop="20.0dip"
+                        android:background="@drawable/shape_bg"
+                        android:orientation="vertical" >
+
+                        <TableRow
+                            android:id="@+id/row4"
+                            android:layout_width="fill_parent"
+                            android:layout_height="46dp"
+                            android:layout_weight="1" >
+
+                            <TextView
+                                android:layout_width="40dip"
+                                android:layout_height="fill_parent"
+                                android:layout_weight="2"
+                                android:drawableLeft="@drawable/thecloud"
+                                android:textColor="#ff545454"
+                                android:textSize="17sp" />
+
+                            <TextView
+                                android:id="@+id/houtai_tv"
+                                android:layout_width="40dip"
+                                android:layout_height="fill_parent"
+                                android:layout_weight="1"
+                                android:gravity="center_horizontal|center_vertical"
+                                android:textColor="#ff545454"
+                                android:textSize="17sp" />
+                        </TableRow>
+
+                        <View
+                            android:layout_width="fill_parent"
+                            android:layout_height="2.0px"
+                            android:background="@drawable/shape_line" />
+
+                        <LinearLayout
+                            android:layout_width="fill_parent"
+                            android:layout_height="46dp"
+                            android:orientation="horizontal" >
+
+                            <TableRow
+                                android:id="@+id/row5"
+                                android:layout_width="fill_parent"
+                                android:layout_height="46dp"
+                                android:layout_weight="1" >
+
+                                <TextView
+                                    android:layout_width="40dip"
+                                    android:layout_height="fill_parent"
+                                    android:layout_weight="2"
+                                    android:drawableLeft="@drawable/rsu"
+                                    android:textColor="#ff545454"
+                                    android:textSize="17sp" />
+
+                                <TextView
+                                    android:id="@+id/mk5_tv"
+                                    android:layout_width="40dip"
+                                    android:layout_height="fill_parent"
+                                    android:layout_weight="1"
+                                    android:gravity="center_horizontal|center_vertical"
+                                    android:textColor="#ff545454"
+                                    android:textSize="17sp" />
+                            </TableRow>
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </RelativeLayout>
+        </LinearLayout>
+        <!-- 交通灯界面 -->
+
+        <LinearLayout
+            android:id="@+id/trafficlight_linearlayout"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="160dp"
+            android:background="@color/white"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <RelativeLayout
+                android:id="@+id/light_layout"
+                android:layout_width="fill_parent"
+                android:layout_height="150dp"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:background="@drawable/backgroud"
+                android:visibility="gone" >
+
+                <ImageView
+                    android:id="@+id/green"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/green"
+                    android:visibility="gone" />
+
+                <ImageView
+                    android:id="@+id/yellow"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/yellow"
+                    android:visibility="gone" />
+
+                <ImageView
+                    android:id="@+id/red"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/red"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/traf_lig_info"
+                    android:layout_width="150dp"
+                    android:layout_height="50dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="20dp"
+                    android:gravity="center_horizontal" />
+            </RelativeLayout>
+        </LinearLayout>
+
+        
+         <!-- 跟驰界面 -->
+        <LinearLayout
+            android:id="@+id/cargroup_member_linearlayout"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerHorizontal="true"
+            
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="250dp"
+            
+            android:background="@color/white"
+            android:orientation="vertical"
+            android:visibility="gone" >
+            <RelativeLayout
+        android:id="@+id/id_marker_info"
+        android:visibility="gone"
+        android:layout_width="fill_parent"
+        android:layout_height="240dp"
+        android:layout_alignParentBottom="true"
+        android:background="#CC4e5a6b"
+        android:clickable="true" >
+		
+       <LinearLayout 
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            
+        <Button 
+            android:id="@+id/navigate"
+            android:layout_width="60dp"
+            android:layout_height="150dp"
+            android:layout_gravity="center"
+            android:text="跟上这辆车"/>
+        
+        <Button 
+            android:id="@+id/cargroup_follow_end"
+            android:layout_width="60dp"
+            android:layout_height="150dp"
+            android:layout_gravity="center"
+            android:text="结束跟驰"/>
+         <ImageView 
+            android:id="@+id/warn_level_iv"
+            android:layout_width="120dp"
+            android:layout_height="150dp"
+            android:layout_gravity="center"
+            android:text=""/>
+        
+          <ImageView
+            android:id="@+id/info_img"
+            android:layout_width="fill_parent"
+            android:layout_height="150dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:layout_marginTop="10dp"
+            android:alpha="1.0"
+            android:background="@drawable/map_image_border_white"
+            android:clickable="true"
+            android:scaleType="fitXY"
+            android:src="@drawable/car" />
+            
+
+
+        </LinearLayout>
+        
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="70dp"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/bg_map_bottom" >
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/tvinfo_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="老米家泡馍小炒"
+                    android:textColor="#FFF5EB"
+                    android:textStyle="bold" 
+                    android:textSize="18dp"/>
+
+                <TextView
+                    android:id="@+id/tvinfo_distance"
+                    android:layout_width="210dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:text="北京朝阳区北三环北京化工大学北京朝阳区北三环北京化工大学"
+                    android:textColor="#FFF5EB" 
+                    android:textSize="11dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="10dp"
+                android:orientation="vertical" >
+				
+                <LinearLayout 
+                    android:layout_width="wrap_content"
+                	android:layout_height="wrap_content"
+                 	android:orientation="horizontal">   
+                    
+                    <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:text="车辆信息："
+                    android:textSize="14dp"
+                    android:textColor="#FFF5EB" />
+                
+               	 	<TextView
+                    android:id="@+id/tvcar_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:text="null"
+                    android:textSize="14dp"
+                    android:textColor="#FFF5EB" />
+                    
+                </LinearLayout>
+                
+                <LinearLayout 
+                    android:layout_width="wrap_content"
+                	android:layout_height="wrap_content"
+                 	android:orientation="horizontal"
+                 	android:layout_marginTop="9dp">   
+                    
+                    <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:text="ID："
+                    android:textSize="14dp"
+                    android:textColor="#FFF5EB" />
+                
+                	<TextView
+                    android:id="@+id/tvcar_id"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:text="652"
+                    android:textColor="#00FF7F" 
+                    android:textSize="18dp"/>
+                    
+                </LinearLayout>
+                
+            </LinearLayout>
+        </RelativeLayout>
+    </RelativeLayout>
+              </LinearLayout>
+        <!-- OBD界面 -->
+        <LinearLayout
+            android:id="@+id/obd_linearlayout"
+            android:layout_width="400dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="160dip"
+            android:background="@color/white"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/title_bar"
+                android:orientation="vertical" >
+
+                <Button
+                    android:id="@+id/obdreturn_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="10dip"
+                    android:background="@drawable/selector_btn_back"
+                    android:gravity="center_horizontal|center_vertical"
+                    android:text="返回"
+                    android:textColor="#ffffff"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/textView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="OBD信息"
+                    android:textColor="@color/white"
+                    android:textSize="20.0sp" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10.0dip"
+                android:layout_marginRight="10.0dip"
+                android:layout_marginTop="5dip"
+                android:background="@drawable/shape_bg"
+                android:orientation="vertical" >
+
+                <TableRow
+                    android:id="@+id/row0"
+                    android:layout_width="fill_parent"
+                    android:layout_height="46dp"
+                    android:layout_weight="1" >
+
+                    <TextView
+                        android:layout_width="40dip"
+                        android:layout_height="fill_parent"
+                        android:layout_weight="2"
+                        android:drawableLeft="@drawable/pic_battery"
+                        android:text="电池电压:"
+                        android:textColor="#ff545454"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:id="@+id/obd_tv_vbat"
+                        android:layout_width="40dip"
+                        android:layout_height="fill_parent"
+                        android:layout_weight="1"
+                        android:gravity="center_horizontal|center_vertical"
+                        android:textColor="#ff545454"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="40dip"
+                        android:layout_height="fill_parent"
+                        android:layout_weight="2"
+                        android:drawableLeft="@drawable/pic_motor"
+                        android:text="发动机转速:"
+                        android:textColor="#ff545454"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:id="@+id/obd_tv_rpm"
+                        android:layout_width="40dip"
+                        android:layout_height="fill_parent"
+                        android:layout_weight="1"
+                        android:gravity="center_horizontal|center_vertical"
+                        android:textColor="#ff545454"
+                        android:textSize="17sp" />
+                </TableRow>
+
+                <View
+                    android:layout_width="fill_parent"
+                    android:layout_height="2.0px"
+                    android:background="@drawable/shape_line" />
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="46dp"
+                    android:orientation="horizontal" >
+
+                    <TableRow
+                        android:id="@+id/row1"
+                        android:layout_width="fill_parent"
+                        android:layout_height="46dp"
+                        android:layout_weight="1" >
+
+                        <TextView
+                            android:layout_width="40dip"
+                            android:layout_height="fill_parent"
+                            android:layout_weight="2"
+                            android:drawableLeft="@drawable/pic_speed"
+                            android:text="SPD车速:"
+                            android:textColor="#ff545454"
+                            android:textSize="17sp" />
+
+                        <TextView
+                            android:id="@+id/obd_tv_spd"
+                            android:layout_width="40dip"
+                            android:layout_height="fill_parent"
+                            android:layout_weight="1"
+                            android:gravity="center_horizontal|center_vertical"
+                            android:textColor="#ff545454"
+                            android:textSize="17sp" />
+
+                        <TextView
+                            android:layout_width="40dip"
+                            android:layout_height="fill_parent"
+                            android:layout_weight="2"
+                            android:drawableLeft="@drawable/pic_tp"
+                            android:text="TP节气门开度:"
+                            android:textColor="#ff545454"
+                            android:textSize="17sp" />
+
+                        <TextView
+                            android:id="@+id/obd_tv_tp"
+                            android:layout_width="40dip"
+                            android:layout_height="fill_parent"
+                            android:layout_weight="1"
+                            android:gravity="center_horizontal|center_vertical"
+                            android:textColor="#ff545454"
+                            android:textSize="17sp" />
+                    </TableRow>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="fill_parent"
+                    android:layout_height="2.0px"
+                    android:background="@drawable/shape_line" />
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="40.0dip"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal" >
+
+                    <TableRow
+                        android:id="@+id/row2"
+                        android:layout_width="fill_parent"
+                        android:layout_height="46dp"
+                        android:layout_weight="1" >
+
+                        <TextView
+                            android:layout_width="40dip"
+                            android:layout_height="fill_parent"
+                            android:layout_weight="2"
+                            android:drawableLeft="@drawable/pic_lod"
+                            android:text="LOD发动机负荷:"
+                            android:textColor="#ff545454"
+                            android:textSize="17sp" />
+
+                        <TextView
+                            android:id="@+id/obd_tv_lod"
+                            android:layout_width="40dip"
+                            android:layout_height="fill_parent"
+                            android:layout_weight="1"
+                            android:gravity="center_horizontal|center_vertical"
+                            android:textColor="#ff545454"
+                            android:textSize="17sp" />
+
+                        <TextView
+                            android:layout_width="40dip"
+                            android:layout_height="fill_parent"
+                            android:layout_weight="2"
+                            android:drawableLeft="@drawable/pic_ect"
+                            android:text="ECT冷却液水温:"
+                            android:textColor="#ff545454"
+                            android:textSize="17sp" />
+
+                        <TextView
+                            android:id="@+id/obd_tv_ect"
+                            android:layout_width="40dip"
+                            android:layout_height="fill_parent"
+                            android:layout_weight="1"
+                            android:gravity="center_horizontal|center_vertical"
+                            android:textColor="#ff545454"
+                            android:textSize="17sp" />
+                    </TableRow>
+
+                    <requestFocus />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="fill_parent"
+                    android:layout_height="2.0px"
+                    android:background="@drawable/shape_line" />
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="40.0dip"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal" >
+
+                    <TableRow
+                        android:id="@+id/row3"
+                        android:layout_width="fill_parent"
+                        android:layout_height="46dp"
+                        android:layout_weight="1" >
+
+                        <TextView
+                            android:layout_width="40dip"
+                            android:layout_height="fill_parent"
+                            android:layout_weight="2"
+                            android:drawableLeft="@drawable/pic_fli"
+                            android:text="FLI油箱剩余油量:"
+                            android:textColor="#ff545454"
+                            android:textSize="17sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/obd_tv_fli"
+                            android:layout_width="40dip"
+                            android:layout_height="fill_parent"
+                            android:layout_weight="1"
+                            android:gravity="center_horizontal|center_vertical"
+                            android:textColor="#ff545454"
+                            android:textSize="17sp" >
+                        </TextView>
+
+                        <TextView
+                            android:layout_width="40dip"
+                            android:layout_height="fill_parent"
+                            android:layout_weight="2"
+                            android:drawableLeft="@drawable/pic_mph"
+                            android:text="MPH瞬时油耗:"
+                            android:textColor="#ff545454"
+                            android:textSize="17sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/obd_tv_mph"
+                            android:layout_width="40dip"
+                            android:layout_height="fill_parent"
+                            android:layout_weight="1"
+                            android:gravity="center_horizontal|center_vertical"
+                            android:textColor="#ff545454"
+                            android:textSize="17sp" >
+                        </TextView>
+                    </TableRow>
+
+                    <requestFocus />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="fill_parent"
+                    android:layout_height="2.0px"
+                    android:background="@drawable/shape_line" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 接收后台邀约申请界面 -->
+
+        <LinearLayout
+            android:id="@+id/group_invite_apply"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="@color/white"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/title_bar"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="邀请"
+                    android:textColor="@color/white"
+                    android:textSize="20.0sp" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10.0dip"
+                android:layout_marginRight="10.0dip"
+                android:layout_marginTop="20.0dip"
+                android:background="@drawable/shape_bg"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="40.0dip"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="right"
+                        android:text="群組："
+                        android:textColor="@android:color/black"
+                        android:textSize="15.0sp" />
+
+                    <TextView
+                        android:id="@+id/group__invite_apply_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@android:color/white"
+                        android:maxLength="20"
+                        android:textColor="#ff545454"
+                        android:textSize="15.0sp" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="fill_parent"
+                    android:layout_height="1.0px"
+                    android:background="@drawable/shape_line" />
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="40.0dip"
+                    android:gravity="center_horizontal|center_vertical"
+                    android:orientation="horizontal" >
+
+                    <TextView
+                        android:layout_width="40.0dip"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="right"
+                        android:text="起点："
+                        android:textColor="@android:color/black"
+                        android:textSize="15.0sp" />
+
+                    <TextView
+                        android:id="@+id/group_apply_start"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="3"
+                        android:background="@android:color/white"
+                        android:textColor="#ff545454"
+                        android:textSize="15.0sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="right"
+                        android:text="终点："
+                        android:textColor="@android:color/black"
+                        android:textSize="15.0sp" />
+
+                    <TextView
+                        android:id="@+id/group_apply_end"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="3"
+                        android:background="@android:color/white"
+                        android:textColor="#ff545454"
+                        android:textSize="15.0sp" />
+
+                    <requestFocus />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="fill_parent"
+                    android:layout_height="1.0px"
+                    android:background="@drawable/shape_line" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal" >
+
+                <Button
+                    android:id="@+id/group_invite_agree"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20.0dip"
+                    android:layout_marginRight="20.0dip"
+                    android:layout_marginTop="10.0dip"
+                    android:layout_weight="1"
+                    android:background="@drawable/op_bg_selector"
+                    android:text="同意"
+                    android:textColor="#ff000000"
+                    android:textSize="15.0sp" />
+
+                <Button
+                    android:id="@+id/group_invite_cancel"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20.0dip"
+                    android:layout_marginRight="20.0dip"
+                    android:layout_marginTop="10.0dip"
+                    android:layout_weight="1"
+                    android:background="@drawable/op_bg_selector"
+                    android:text="取消"
+                    android:textColor="#ff000000"
+                    android:textSize="15.0sp" />
+            </LinearLayout>
+        </LinearLayout>
+        <!-- 群组成员 -->
+
+        <RelativeLayout
+            android:id="@+id/car_group_member"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="@color/white"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <RelativeLayout
+                android:id="@+id/group_title1"
+                android:layout_width="fill_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/title_bar"
+                android:orientation="vertical" >
+
+                <Button
+                    android:id="@+id/group_member_back_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="10dip"
+                    android:background="@drawable/selector_btn_back"
+                    android:gravity="center_horizontal|center_vertical"
+                    android:text="返回"
+                    android:textColor="#ffffff"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="群组成员"
+                    android:textColor="@color/white"
+                    android:textSize="20.0sp" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_below="@id/group_title1"
+                android:orientation="vertical" >
+
+                <ListView
+                    android:id="@+id/group_listview_member"
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:divider="#FFFFFF" >
+                </ListView>
+            </LinearLayout>
+        </RelativeLayout>
+        
+        <!-- 后台车队公告信息推送 -->
+
+        <RelativeLayout
+            android:id="@+id/car_group_announcement"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="@color/white"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <RelativeLayout
+                android:id="@+id/group_announcement"
+                android:layout_width="fill_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/title_bar"
+                android:orientation="vertical" >
+
+                <Button
+                    android:id="@+id/group_announcement_back_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="10dip"
+                    android:background="@drawable/selector_btn_back"
+                    android:gravity="center_horizontal|center_vertical"
+                    android:text="返回"
+                    android:textColor="#ffffff"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="群组公告"
+                    android:textColor="@color/white"
+                    android:textSize="20.0sp" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_below="@id/group_announcement"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/group_textview_announcement"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:textColor="@color/黑"
+                    android:textSize="20.0sp"
+                    >
+                </TextView>
+                
+            </LinearLayout>
+        </RelativeLayout>
+
+        <!-- 自我定位按钮 -->
+
+        <Button
+            android:id="@+id/centre_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="25dip"
+            android:layout_marginTop="110dip"
+            android:background="@drawable/custom_loc" />
+
+        
+        <Button
+            android:id="@+id/MK5_trigger"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="58dip"
+            android:background="@drawable/cargroup_more" />
+        
+	   <!-- 交通灯 OBD 信息推送 相关的按钮-->
+	   <LinearLayout
+			android:id="@+id/MK5info_LinearLayout"    
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_alignParentTop="true"
+			android:orientation="horizontal" 
+			android:visibility="gone"  >
+			
+			<Button
+				android:id="@+id/btn_OBD"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="0dip"
+				android:layout_marginTop="55dip"
+				android:text="OBD" />
+			     <!-- 交通灯 -->
+			
+			<Button
+			    android:id="@+id/btn_TrafficLight"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_toRightOf="@id/btn_OBD"
+			    android:layout_marginTop="55dip"
+			    android:text="交通灯" />
+			
+			<!-- 信息推送 -->
+			
+			<Button
+			    android:id="@+id/btn_MsgPush"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_toRightOf="@id/btn_TrafficLight"
+			    android:layout_marginTop="55dip"
+			    android:text="信息推送" />
+			
+			<Button
+			    android:id="@+id/MK5function_back"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_toRightOf="@id/btn_MsgPush"
+			    android:layout_marginTop="55dip" 
+			    android:background="@drawable/cargroup_back"/>
+			
+			
+        </LinearLayout>
+        
+        
+        
+        
+    </RelativeLayout>
+
+</LinearLayout>
