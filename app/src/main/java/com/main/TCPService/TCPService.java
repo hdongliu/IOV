@@ -1,6 +1,7 @@
 package com.main.TCPService;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Iterator;
@@ -43,6 +44,12 @@ public class TCPService extends Service {
 	String matches = "";
 	ServerSocket serversocket = null;
 	public static boolean Flag_Connection_MK5 = false;//与MK5连接
+	
+	/** 弱引用 在引用对象的同时允许对垃圾对象进行回收  */
+	private WeakReference<Socket> mSocket;
+	
+	//开启socket线程的次数
+	private int count = 0;
 
 	@Override
 	public void onCreate() {
@@ -91,6 +98,7 @@ public class TCPService extends Service {
 
 						Log.i(TAG, "deleteAll()------");
 						Manager.getManager().deleteAll();
+						
 
 						/*
 						 * 2016年1月6日11:36:42 加入代码 还需测试
@@ -276,9 +284,10 @@ public class TCPService extends Service {
 
 			while (true) {
 				try {
+					count++;
 					// System.out.println("----------等待        客户端-----------");
 					Socket socket = serversocket.accept();
-					Log.i(TAG, "----------有客户端连接        客户端-----------");
+					Log.i(TAG, "----------有客户端连接        客户端-----------" +count);
 					Client cs = new Client(socket, TCPService.this);
 					cs.start();
 					Manager.getManager().add(cs);
@@ -290,5 +299,6 @@ public class TCPService extends Service {
 			}
 		}
 	}
+	
 
 }

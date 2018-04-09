@@ -1,5 +1,6 @@
 package com.Li.serviceThread;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -68,16 +69,16 @@ public class ClientManager {
         	ServiceClient clientTmp = (ServiceClient)it.next();
 
 //        	System.out.println("[Manager.java] start delete the "+clientTmp.clientID+"");
-//        	try {
-//	        		if( clientTmp != null && clientTmp.socket != null &&  !clientTmp.socket.isClosed() && !clientTmp.socket.isOutputShutdown() )
-//	        		{	
-//	        			clientTmp.socket.close();
-//	        			
-//	        		}
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+        	try {
+	        		if( clientTmp != null && clientTmp.socketClient != null &&  !clientTmp.socketClient.isClosed() && !clientTmp.socketClient.isOutputShutdown() )
+	        		{	
+	        			clientTmp.socketClient.close();
+	        			
+	        		}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         	
         	it.remove();
         	

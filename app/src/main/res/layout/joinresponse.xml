@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white"  >
+    
+    <RelativeLayout
+         android:layout_width="match_parent"
+         android:layout_height="50dp"
+         android:background="@drawable/title_bar"
+         android:orientation="horizontal" >
+
+         <TextView
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_centerInParent="true"
+             android:text="入队请求回复"
+             android:textColor="@color/white"
+             android:textSize="20.0sp" />
+     </RelativeLayout>
+     <!-- 入队请求信息 -->
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <!-- 编队ID -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="编队ID："
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <TextView 
+            android:id="@+id/joinresponse_id"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <!-- 入队结果 -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="入队结果："
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <TextView 
+            android:id="@+id/joinresponse_result"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        </LinearLayout>
+       
+     <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <!-- 前车ID -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="前车ID："
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <TextView 
+            android:id="@+id/joinresponse_preid"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <!-- 后车ID -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="后车ID："
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <TextView 
+            android:id="@+id/joinresponse_behid"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        
+    </LinearLayout>
+    
+     <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <!-- 调头 -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="调    头："
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <TextView 
+            android:id="@+id/joinresponse_chghd"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <!-- 后车ID -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <TextView 
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        
+    </LinearLayout>     
+    
+</LinearLayout>
+

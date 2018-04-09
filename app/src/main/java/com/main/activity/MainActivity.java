@@ -65,8 +65,8 @@ public class MainActivity extends Activity {
 		/*
 		 * carMaker通信
 		 */
-		Intent intentCar=new Intent(MainActivity.this,CarMakerService.class);
-		startService(intentCar);
+//		Intent intentCar=new Intent(MainActivity.this,CarMakerService.class);
+//		startService(intentCar);
 		
 		
 //		Intent intent1 = new Intent(MainActivity.this,

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.main.activity" >
-
+    package="com.main.activity">
 
     <!-- Log 自动保存声明 (两行) -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -76,7 +75,7 @@
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="OxFhCl6axZBgB4SvTSuWYITq0wxgF5nS" />
-        <!-- 王永龙的密钥oMi2UKGlhpU57gMC1tGHQXnOFukzVxzT -->
+        <!-- 王永龙的密钥cKZGhO1DLgxbbsxuKyBcPwcsxLSQhTHA -->
         <!-- 刘红东  F7ryvWiZ0Exz0mSSRD4UsGF0ckPzEbYa -->
         <!-- 张卓鹏  OxFhCl6axZBgB4SvTSuWYITq0wxgF5nS -->
         <!-- com.main.activity.MainActivity -->
@@ -91,15 +90,16 @@
         </activity>
         <activity
             android:name="com.Li.register.LoginActivity"
-            android:screenOrientation="portrait"/>
+            android:windowSoftInputMode="stateAlwaysHidden">
+
+        </activity>
         <activity android:name="com.Li.register.RegisterActivity"/>
         <activity
             android:name="com.main.activity.TabMainActivity"
             android:screenOrientation="landscape"/>
         <activity android:name="com.main.baiduMap.OfflineMapActivity"/>
-        <!--<activity android:name="com.main.baiduMap.MapActivity"/>-->
         <activity android:name="com.iflytek.speech.setting.IatSettings"/>
-        <!--<activity android:name="com.chart.activity.RegisterActivity"/>-->
+
         <activity
             android:name="com.main.chart.DisplayActivity"
             android:configChanges="orientation|keyboardHidden"
@@ -109,17 +109,13 @@
             android:name="com.main.activity.BMapApiDemoMain"
             android:configChanges="orientation|keyboardHidden"
             android:label="BaiduMapSDKDemo"
-            android:screenOrientation="landscape"/>
+            android:screenOrientation="portrait"/>
         <activity
             android:name="com.main.activity.BaseMapDemo"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/demo_name_basemap"
             android:screenOrientation="portrait"/>
-        <!--<activity-->
-            <!--android:name="com.main.activity.FragmentTableActivity"-->
-            <!--android:configChanges="orientation|keyboardHidden"-->
-            <!--android:label="@string/demo_name_basemap"-->
-            <!--android:screenOrientation="portrait"/>-->
+
         <activity
             android:name="com.main.activity.MapFragmentDemo"
             android:configChanges="orientation|keyboardHidden"
@@ -239,25 +235,16 @@
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/demo_name_opengl"
             android:screenOrientation="landscape"/>
-        <!--<activity-->
-        <!--android:name="com.main.activity.VehicleTeam_Activity"-->
-        <!--android:screenOrientation="portrait" >-->
-        <!--</activity>-->
 
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"
             android:process=":remote"/>
         <service android:name="com.main.TCPService.TCPService"/>
-        <!--<service android:name="tcpclient_tanhui.TCPClientService"></service>-->
-        <!--<service android:name="com.Li.service.serviceBackground"></service>-->
+
         <service android:name="com.Li.carMakerService.CarMakerService"/>
         <service android:name="com.Li.serviceThread.ServerConnectService"/>
-        <!--<service android:name="udpserver.UDPservice">-->
-            <!--<intent-filter>-->
-                <!--<action android:name="src.udpserver.UDPservice" />-->
-            <!--</intent-filter>-->
-        <!--</service>-->
+
     </application>
 
 </manifest>

@@ -83,8 +83,10 @@ public class LoginActivity extends FragmentActivity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+				
 		// 设置屏幕旋转
-		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+//		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);	
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		// 设置输入法不弹起
 		setContentView(R.layout.activity_login);
 //		mShare_Preference_Init();// 拿到RegisterActivity的SP
@@ -97,15 +99,7 @@ public class LoginActivity extends FragmentActivity implements
 		editor = account.edit();
 		isAuto = account.getInt("auto", 0);
 		isCheck = account.getInt("check", 0); // 刚进入界面获取 是否记住密码的状态
-		// 自动登录
-		if (isAuto == 1) {
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					// TODO Auto-generated method stub
-				}
-			}).start();
-		}
+		
 		// 记住密码
 		if (isCheck == 1) {
 			// 记住密码，从SharedPreference中就获取账号密码
@@ -120,17 +114,27 @@ public class LoginActivity extends FragmentActivity implements
 			// 不记住密码
 			rememberPassword.setChecked(false);
 		}
-		// 自动登录监听器
-		autoLogin.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+		// 自动登录
+		if (isAuto == 1) {
+			autoLogin.setChecked(true);
+			if (MyApplication.isServerConnect) {
+				try {
+					mJson_login.put("datatype", "VEH_LOGIN");// 数据类型 登录
+					mJson_login.put("fromtype", "veh");// 数据来源
+					mJson_login.put("owner_id", "4CFC2BD17DF5793CB");// 数据key
+					mJson_login.put("veh_lpn", user_name.getText().toString());// 数据车牌号
+					mJson_login.put("veh_pwd", user_password.getText().toString());// 密码
+					mJson_login.put("veh_id", user_name.getText().toString());// 车的id
+					mJson_login.put("fromid", user_name.getText().toString());// 从哪里来的数据
 
-			@Override
-			public void onCheckedChanged(CompoundButton arg0, boolean bool) {
-				// TODO Auto-generated method stub
-				if (bool) {// 自动登录选中，记住密码也选中。
-					rememberPassword.setChecked(true);
+					Util.send_To_Clound(mJson_login);
+				} catch (JSONException e) {
+					e.printStackTrace();
 				}
+			} else {
+				Toast.makeText(LoginActivity.this, "与服务器未连接", Toast.LENGTH_SHORT).show();
 			}
-		});
+		}
 		// 记住密码监听器
 		rememberPassword
 				.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -148,6 +152,18 @@ public class LoginActivity extends FragmentActivity implements
 						}
 					}
 				});
+		// 自动登录监听器
+		autoLogin.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+			@Override
+			public void onCheckedChanged(CompoundButton arg0, boolean bool) {
+				// TODO Auto-generated method stub
+				if (bool) {// 自动登录选中，记住密码也选中。
+					rememberPassword.setChecked(true);
+				}
+			}
+		});
+		
 
 	}
 	
@@ -199,6 +215,23 @@ public class LoginActivity extends FragmentActivity implements
 						TabMainActivity.class);
 				startActivity(intent1);
 //				intent1 = null;
+				
+				// 在登录时，判断控件是否记住密码，只有正确登录才能保存密码
+				 if (autoLogin.isChecked()) {
+				 editor.putInt("check",1);
+				 editor.putInt("auto", 1);
+				 editor.putString("user", user_name.getText().toString());
+				 editor.putString("pass", user_password.getText().toString());
+				 }else if(rememberPassword.isChecked()){
+				 editor.putInt("check",1);
+				 editor.putString("user", user_name.getText().toString());
+				 editor.putString("pass", user_password.getText().toString());
+				 }else {
+				 editor.putInt("check",0);
+				 editor.putInt("auto", 0);
+				 }
+				 editor.commit();
+				MyApplication.user_name = user_name.getText().toString();
 				LoginActivity.this.finish();
 			}
 			
@@ -421,22 +454,7 @@ public class LoginActivity extends FragmentActivity implements
 			finish();
 			break;
 		case R.id.btn_login:
-			// 在登录时，判断控件是否记住密码，只有正确登录才能保存密码
-			 if(autoLogin.isChecked()){
-			 editor.putInt("check",1);
-			 editor.putInt("auto", 1);
-			 editor.putString("user", user_name.getText().toString());
-			 editor.putString("pass", user_password.getText().toString());
-			 }else if(rememberPassword.isChecked()){
-			 editor.putInt("check",1);
-			 editor.putString("user", user_name.getText().toString());
-			 editor.putString("pass", user_password.getText().toString());
-			 }else {
-			 editor.putInt("check",0);
-			 editor.putInt("auto", 0);
-			 }
-			 editor.commit();
-			MyApplication.user_name = user_name.getText().toString();
+			
 			
 			if (MyApplication.isServerConnect) {
 				try {

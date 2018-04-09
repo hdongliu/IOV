@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" 
+    android:background="@color/white">
+    
+    <TextView 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="注意前方有车辆入队"
+        android:gravity="center"
+        android:textSize="20sp"
+        android:textColor="@color/black" /> 
+
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <!-- 调整速度 -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="20dp"
+			android:text="调整速度："
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+                
+        <TextView 
+			android:id="@+id/advspeed"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="10dp"
+			android:text="km/h"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>        
+        
+    </LinearLayout>
+    
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <!-- 调整距离 -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="20dp"
+			android:text="调整距离："
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+                
+        <TextView 
+			android:id="@+id/advdistance"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="40dp"
+			android:text="m"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>          
+        
+    </LinearLayout>
+ 
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <!-- 当前距离 -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="20dp"
+			android:text="当前距离："
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+                
+        <TextView 
+			android:id="@+id/curdistance"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="40dp"
+			android:text="m"
+			android:textSize="20sp"
+			android:textColor="@color/black"/> 
+    </LinearLayout>
+    
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <!-- 入队车辆数 -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="20dp"
+			android:text="入队车辆："
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+                
+        <TextView 
+			android:id="@+id/joincarnum"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="40dp"
+			android:text="辆"
+			android:textSize="20sp"
+			android:textColor="@color/black"/> 
+    </LinearLayout>    
+    
+</LinearLayout>

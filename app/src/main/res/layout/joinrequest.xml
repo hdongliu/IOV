@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white" >
+    
+    <RelativeLayout
+         android:layout_width="match_parent"
+         android:layout_height="50dp"
+         android:background="@drawable/title_bar"
+         android:orientation="horizontal" >
+
+         <TextView
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_centerInParent="true"
+             android:text="入队请求"
+             android:textColor="@color/white"
+             android:textSize="20.0sp" />
+     </RelativeLayout>
+     
+     <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <!-- 入队请求车辆ID-->
+        <LinearLayout 
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal">
+	        <TextView 
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="车辆ID："
+				android:textSize="20sp"
+				android:textColor="@color/black"/>
+	        	        
+	        <TextView 
+	            android:id="@+id/joinrequest_vehid"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textSize="20sp"
+				android:textColor="@color/black"/>
+	    </LinearLayout>    
+
+        <!-- 入队请求车辆的方位-->
+        <LinearLayout 
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal">
+	        <TextView 
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="车辆方位："
+				android:textSize="20sp"
+				android:textColor="@color/black"/>
+	        	        
+	        <TextView 
+	            android:id="@+id/joinrequest_quadrant"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textSize="20sp"
+				android:textColor="@color/black"/>
+	    </LinearLayout>   
+	            
+        <!-- 入队请求车辆距离-->  
+        <LinearLayout 
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal">
+	        <TextView 
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="车辆距离："
+				android:textSize="20sp"
+				android:textColor="@color/black"/>
+	        	        
+	        <TextView 
+	            android:id="@+id/joinrequest_distance"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textSize="20sp"
+				android:textColor="@color/black"/>
+	    </LinearLayout>          
+            
+        
+    </LinearLayout>
+    
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <!-- 入队请求同意 -->
+        <Button 
+	       android:id="@+id/joinrequest_agree"
+	       android:layout_width="0dp"
+	       android:layout_height="wrap_content"
+	       android:layout_weight="1"
+	       android:gravity="center"
+	       android:text="同意"
+	       android:textSize="20sp"
+	       android:textColor="@color/black" />
+        <!-- 入队请求拒绝 -->
+        <Button 
+	       android:id="@+id/joinrequest_reject"
+	       android:layout_width="0dp"
+	       android:layout_height="wrap_content"
+	       android:layout_weight="1"
+	       android:gravity="center"
+	       android:text="拒绝"
+	       android:textSize="20sp"
+	       android:textColor="@color/black" />
+        
+    </LinearLayout>   
+    
+</LinearLayout>

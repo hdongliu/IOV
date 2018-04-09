@@ -27,19 +27,17 @@ public class TabMainActivity extends TabActivity {
 //		.setContent(new Intent(this, RoutePlanDemo.class)));
 
 		tabHost.addTab(tabHost.newTabSpec("tab4")
-				.setIndicator("车辆组队",getResources().getDrawable(R.drawable.location_fill))
+				.setIndicator("",getResources().getDrawable(R.drawable.location_fill))
 				.setContent(new Intent(this, OverlayDemo.class)));
 		tabHost.setCurrentTab(0);
 		
 		tabHost.addTab(tabHost.newTabSpec("tab2")
-				.setIndicator("聊天",getResources().getDrawable(R.drawable.community_fill))
+				.setIndicator("",getResources().getDrawable(R.drawable.community_fill))
 				.setContent(new Intent(this, DisplayActivity.class)));
-		tabHost.setCurrentTab(0);
 		
 		tabHost.addTab(tabHost.newTabSpec("tab3")
-				.setIndicator("信息显示",getResources().getDrawable(R.drawable.new_fill))
+				.setIndicator("",getResources().getDrawable(R.drawable.new_fill))
 				.setContent(new Intent(this, Dis_Info_Activity.class)));
-		tabHost.setCurrentTab(0);
 		
 	}
 }

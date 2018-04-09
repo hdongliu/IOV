@@ -8,27 +8,43 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.text.Format;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.util.Log;
 
+import com.alibaba.fastjson.JSON;
+import com.liu.Class.formation;
+import com.liu.Class.joinadjust;
+import com.liu.Class.joinresponse;
+import com.liu.Class.leave;
+import com.liu.Class.request;
+import com.liu.Class.selfadjust;
 import com.main.TCPService.TCPService;
 import com.main.activity.MyApplication;
+import com.main.activity.OverlayDemo;
+import com.main.activity.RadarDemo.MyPagerAdapter;
+import com.main.baiduMap.Group;
 import com.main.baiduMap.MapActivity_val;
+
+import Utili.Package.Util;
 
 /*
  * 与MK5通信线程
  */
 public class Client extends Thread {
-	private final static String TAG = "liuhongdong";
+	private final static String TAG = "Client";
 	private String FLAG = "client";
 	public Socket socket;
 	Context context;
@@ -67,6 +83,7 @@ public class Client extends Thread {
 	public static boolean MK5Flag = false;
 	public static int LatLocalNumber;
 	public static int LongLocalNumber;
+	public static int idLocal;//来自于MK5的本车ID号
 	public static JSONObject out = new JSONObject();
 	public static int vin;
 	static public String flagAlert = null;
@@ -79,7 +96,17 @@ public class Client extends Thread {
 	int a = 0;
 	int b = 0;
 	public String matches = "";
+	
+	//定义Map集合 存储MK5发过来的车队状态信息
+    public static HashMap<String, String> formation_status = new HashMap<String, String>();
+    //定义Map集合 存储MK5发过来的附件车队信息
+    public static HashMap<Integer, String> motorcade_list = new HashMap<Integer, String>();
 
+    public static boolean motorcade_list_flag = true;
+    public static boolean requestflag = true;
+    
+    private JSONObject json_motorcadelist = null;
+    
 	public Client(Socket s, Context c) {
 		this.socket = s;
 		this.context = c;
@@ -103,7 +130,7 @@ public class Client extends Thread {
 		try {
 			while ((matches = br.readLine()) != null) {
 
-				Log.i("zhanghao", "从Mk5接受到的信息为：" + matches);
+				Log.v(TAG, "从Mk5接受到的信息为：" + matches);
 				fixedThreadPool.execute(command);
 
 			}
@@ -138,7 +165,7 @@ public class Client extends Thread {
 			bos.write(headParam.toString());
 			bos.flush();
 
-			Log.i(TAG, "bos.flush()------");
+			Log.i(TAG, "bos.flush()------headParam.toString()"+headParam.toString());
 
 			// /clear send message wkl 20150726
 			if (headParam.has("addID"))
@@ -153,37 +180,281 @@ public class Client extends Thread {
 			e.printStackTrace();
 		}
 	}
+	
+	
 
 	// 解析Mk5发过来的 消息
 	public void parseJson(String strResult) throws JSONException {
 
 		JSONObject jsonObject = new JSONObject(strResult);
-		/*
-		 * currentState 为红绿灯的状态，为数字1、2、3。“1”是红灯状态；“2”是黄灯状态；“3”是红灯状态
-		 */
+		
+		//编队相关的业务解析
+		if (jsonObject.has("msgtype")) {
+			// 创建编队回复
+			if ("creatformation".equals(jsonObject.getString("msgtype"))) {
+				Log.i(TAG, "创建编队回复creatformation information always save -----------");
+				MyApplication.createstatus = jsonObject.getBoolean("status");
+				MyApplication.formationid = jsonObject.getString("formationid");
+				MyApplication.formationtype = jsonObject.getInt("formationtype");
+				MyApplication.rcvTime_cfresponse = System.currentTimeMillis();
+				
+				if (MyApplication.createstatus) {
+					if (MyApplication.isServerConnect) {
+
+						// 这里将创建编队中的 信息发送到 后台
+						try {
+							JSONObject mJson_team_creation = new JSONObject();
+							mJson_team_creation.put("datatype", "TEAM_REGISTER");
+							mJson_team_creation.put("fromid", MyApplication.formationid);
+							mJson_team_creation.put("fromtype", "veh");
+							mJson_team_creation.put("team_id", MyApplication.formationid);
+							mJson_team_creation.put("team_name", OverlayDemo.formationName.getText().toString());
+							mJson_team_creation.put("team_description", "hello,一路同行！");
+							mJson_team_creation.put("team_start", OverlayDemo.formationStart.getText().toString());
+							mJson_team_creation.put("team_end", OverlayDemo.formationEnd.getText().toString());
+							mJson_team_creation.put("team_veh_maxnumber", "10");
+							mJson_team_creation.put("team_veh_number", "1");
+							 	
+							Util.send_To_Clound(mJson_team_creation);
+							
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+			
+			// 接收车队状态信息
+			if ("vehlist".equals(jsonObject.getString("msgtype"))) {									
+				MyApplication.formationid = jsonObject.getString("formationid");
+				MyApplication.vehicle_numbers = jsonObject.getInt("membervehnum");
+				MyApplication.localvehid = jsonObject.getString("localvehid");
+				MyApplication.vehnum = jsonObject.getInt("vehnum");
+				MyApplication.curspeed = jsonObject.getDouble("curspeed");
+				MyApplication.advspeed = jsonObject.getDouble("advspeed");
+				MyApplication.curdistance = jsonObject.getDouble("curdistance");
+				MyApplication.advdistance = jsonObject.getDouble("advdistance");
+				MyApplication.prevehid = jsonObject.getString("prevehid");
+				Log.i(TAG, "接收车队状态信息------------"+MyApplication.formationid);
+				String vehiclelist = jsonObject.getString("vehiclelist");
+ 				formation_status.put(jsonObject.getString("formationid"), vehiclelist);
+			}
+			
+			// 点击查询车队后，接收mk5回复的附近的车队
+			if ("motorcadelist".equals(jsonObject.getString("msgtype"))) {
+				int motorcadenum = jsonObject.getInt("motorcadenum");
+				if (motorcadenum > 0 && motorcade_list_flag) {
+					Log.i(TAG, " 点击查询车队后，接收mk5回复的附近的车队----------"+motorcadenum);
+					motorcade_list.put(motorcadenum, jsonObject.getString("motorcadelist"));
+					sendMotorcadeList(motorcade_list);
+				}
+//				if (motorcadenum > 0) {
+//					Log.i(TAG, " 点击查询车队后，接收mk5回复的附近的车队1111----------"+jsonObject.getString("motorcadelist"));
+//					motorcade_list.put(motorcadenum, jsonObject.getString("motorcadelist"));
+//					Log.i(TAG, " 点击查询车队后，接收mk5回复的附近的车队1111111111----------"+jsonObject.getString("motorcadelist"));
+//					sendMotorcadeList(motorcade_list);
+//					Log.i(TAG, " 点击查询车队后，接收mk5回复的附近的车队222222----------");
+//				}
+				
+				
+//				if (motorcadenum > 0) {
+//					JSONArray jsonArray = new JSONArray(jsonObject.getString("motorcadelist"));
+//					for (int i = 0; i < motorcadenum; i ++) {
+//						JSONObject formationJson = jsonArray.getJSONObject(i);
+//						formation formationmsg = new formation();
+//						formationmsg.setFormationid(formationJson.getString("formationid"));
+//						formationmsg.setFormationname(formationJson.getString("formationname"));
+//						formationmsg.setFormationnum(formationJson.getInt("formationnum"));
+//						formationmsg.setFormaitontype(formationJson.getInt("formationtype"));
+//						formationmsg.setFormationdestination(formationJson.getString("formationdestination"));
+//						formationmsg.setFormationstartlocation(formationJson.getString("formationstartlocation"));
+//						formationmsg.setVehleaderlat(formationJson.getDouble("vehleaderlat"));
+//						formationmsg.setVehleaderlon(formationJson.getDouble("vehleaderlon"));
+//						formationmsg.setVehleaderspeed(formationJson.getDouble("vehleaderspeed"));
+//						motorcade_list.put(i, formationmsg);
+//					}
+//					for (int num : motorcade_list.keySet()) {
+//						Log.i(TAG, "motorcade_list is  " +  num);
+//					}
+//					sendMotorcadeList();
+//				}
+			
+			}
+			
+			// 编队  其他车的加队请求
+			if ("joinformationrequst".equals(jsonObject.getString("msgtype"))) {
+				if (requestflag) {
+					request requestmsg = new request();
+					requestmsg.setVehid(jsonObject.getString("vehid"));
+					requestmsg.setQuadrant(jsonObject.getInt("quadrant"));
+					requestmsg.setDistance(jsonObject.getDouble("distance"));
+				    sendJoinRequest(requestmsg);
+				}
+			    Log.i(TAG, "编队  其他车的加队请求");
+			}
+			
+			// 入队请求后 头车对入队请求车辆的回复（同意或者拒绝）
+			if ("joinformationresult".equals(jsonObject.getString("msgtype"))) {
+				joinresponse joinrs = new joinresponse();
+				joinrs.setStatus(jsonObject.getBoolean("status"));
+				joinrs.setChangeheading(jsonObject.getBoolean("changeheading"));
+				joinrs.setFormationid(jsonObject.getString("formationid"));
+				joinrs.setPrevehid(jsonObject.getString("prevehid"));
+				joinrs.setBehvehid(jsonObject.getString("behvehid"));
+				joinrs.setMembernum(jsonObject.getInt("membernum"));
+				sendJoinResponse(joinrs);
+				
+				if (joinrs.getStatus()) {
+					MyApplication.formationid = joinrs.getFormationid();
+					if (MyApplication.isServerConnect) {
+
+						// 这里将创建编队中的 信息发送到 后台
+						try {
+							JSONObject mJson_team_invite_agree = new JSONObject();
+							mJson_team_invite_agree.put("datatype", "FORMATION_RESPONSE");
+							// 车牌号(被邀请车牌)
+							mJson_team_invite_agree.put("fromtype", "veh");
+							mJson_team_invite_agree.put("fromid", MyApplication.user_name);
+							mJson_team_invite_agree.put("team_id", joinrs.getFormationid());
+
+							Util.send_To_Clound(mJson_team_invite_agree);
+							
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+			
+			// 入队请求后  入队请求车辆进行车队的过程入队提示
+			if ("joinformationchangeheading".equals(jsonObject.getString("msgtype"))) {
+//				Boolean changehead = jsonObject.getBoolean("changeheading");
+//				String preVehId = jsonObject.getString("prevehicleid");
+				selfadjust adjust = new selfadjust();
+				adjust.setChangehead(jsonObject.getBoolean("changeheading"));
+				adjust.setPrevehid(jsonObject.getString("prevehicleid"));
+				sendChangeHeading(adjust);
+			}
+			
+			//入队请求同意后，车队中其他车辆的调整
+			if ("joinformationadjust".equals(jsonObject.getString("msgtype"))) {
+				joinadjust otheradjust = new joinadjust();
+				otheradjust.setAdvspeed(jsonObject.getDouble("advspeed"));
+				otheradjust.setAdvdistance(jsonObject.getDouble("advdistance"));
+				otheradjust.setCurdistance(jsonObject.getDouble("curdistance"));
+				otheradjust.setJoincarnum(jsonObject.getInt("joincarnum"));
+				otheradjust.setPositiontype(jsonObject.getInt("positiontype"));
+				sendOtherAdjust(otheradjust);
+			}
+			
+			// 头车对入队请求车辆的回复为同意后，请求车辆入队，知道车辆入队成功，再通知车辆入队完成
+			if ("joinformationfinish".equals(jsonObject.getString("msgtype"))) {
+				String finishVehId = jsonObject.getString("vehid");
+				sendJoinFinish(finishVehId);
+			}
+			
+			// 头车解散车队
+			if ("disbandformationsuccess".equals(jsonObject.getString("msgtype"))) {
+				sendDismissFormation();
+				
+				if (MyApplication.isServerConnect) {
+					try {
+						JSONObject mJson_team_dismiss = new JSONObject();
+						mJson_team_dismiss.put("datatype", "TEAM_DISMISS");
+						mJson_team_dismiss.put("team_id", MyApplication.formationid);
+						mJson_team_dismiss.put("fromtype", "veh");
+						mJson_team_dismiss.put("fromid", MyApplication.user_name);
+						
+						Util.send_To_Clound(mJson_team_dismiss);
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			
+			// 头车解散车队成功后，通知车队其他车辆车队已经解散了
+			if ("disbandedformation".equals(jsonObject.getString("msgtype"))) {
+				String formationid = jsonObject.getString("formationid");
+				sendDismissedFormation(formationid);
+			}
+			
+			//头车允许请求离队的车离队
+//			if ("leaveformationsuccess".equals(jsonObject.getString("msgtype"))) {
+//				sendLeaveFormation();
+//			}
+			
+			//把车队内有车离队的消息发送给车队内其他车辆
+			if ("leaveformationmessage".equals(jsonObject.getString("msgtype"))) {
+				leave leavemsg = new leave();
+				leavemsg.setLeaveId(jsonObject.getString("vehid"));
+				leavemsg.setPosition(jsonObject.getInt("positiontype"));
+				sendOtherLeaveFormation(leavemsg);
+				Log.i(TAG, "把车队内有车离队的消息发送给车队内其他车辆");
+			}
+			
+			//车队内要离队的车离队成功
+			if ("leaveformationsuccess".equals(jsonObject.getString("msgtype"))) {
+				leave leavemsg = new leave();
+				leavemsg.setLeaveId(jsonObject.getString("vehid"));
+				leavemsg.setPosition(jsonObject.getInt("positiontype"));
+				sendOtherLeaveSuccess(leavemsg);
+				Log.i(TAG, "车队内要离队的车离队成功");
+			}
+			//离队车辆离队后，通知车队内其他车辆有离队
+//			if ("leaveformationmessage".equals(jsonObject.getString("msgtype"))) {
+//				String leaveId = jsonObject.getString("vehid");
+//				sendOtherLeaveFormation(leaveId);
+//			}
+			
+			// 离队车辆未离队成功
+			if ("nativeleaveformationmessage".equals(jsonObject.getString("msgtype"))) {
+				Boolean leave = false;
+				sendLeaveMsg(leave);
+				Log.i(TAG, "离队车辆未离队成功");
+			}
+			
+			// 离队车辆离队成功
+			if ("nativeleaveformationsuccessmessage".equals(jsonObject.getString("msgtype"))) {
+				Boolean leave = true;
+				sendLeaveMsg(leave);
+				Log.i(TAG, "离队车辆离队成功");
+				
+				if (MyApplication.isServerConnect) {
+					try {
+						JSONObject mJson_team_leave = new JSONObject();
+						mJson_team_leave.put("datatype", "TEAM_EXIT");
+						mJson_team_leave.put("team_id", MyApplication.formationid);
+						mJson_team_leave.put("fromtype", "veh");
+						mJson_team_leave.put("fromid", MyApplication.user_name);
+						
+						Util.send_To_Clound(mJson_team_leave);
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			
+			// 接收加入车队后的车队信息
+			if ("".equals(jsonObject.getString("msgtype"))) {
+				
+			}
+			
+		}
+		
 		if (TCPService.Flag_Connection_MK5 == false) {// 如果与MK5连接中断，则要清车辆
 			Other_Car_map.clear();
 		}
-		if (jsonObject.has("CurrentState")) {
-			// Log.i(TAG, "currentState------");
-			MyApplication.lightState = jsonObject.getInt("CurrentState");
+		
+		if (jsonObject.has("Lat_Local")) {
+			idLocal = jsonObject.getInt("ID");
+			LongLocalNumber = jsonObject.getInt("Long_Local");
+			LatLocalNumber = jsonObject.getInt("Lat_Local");
+			
+			MyApplication.isMk5LatLng = true;
 		}
-		if (jsonObject.has("Lat_Local")) {// MK5发的经纬度
-			MyApplication.Lat_From_MK5 = jsonObject.getInt("Lat_Local");
-			Log.i(TAG, "=======================================================" + MyApplication.Lat_From_MK5);
-		}
-
-		if (jsonObject.has("Long_Local")) {
-			MyApplication.Long_From_MK5 = jsonObject.getInt("Long_Local");
-		}
-		/*
-		 * TimeRemain为红绿灯的剩余时间
-		 */
-		if (jsonObject.has("TimeRemain")) {
-			// Log.i(TAG, "TimeRemain------");
-			MyApplication.lightRemainTime = jsonObject.getInt("TimeRemain");
-		}
-
+		
 		// obd data 解析 wangyonglong
 		if (jsonObject.has("VBAT")) {
 			MyApplication.OBDFlag_display = true;
@@ -213,7 +484,7 @@ public class Client extends Thread {
 
 		if (jsonObject.has("FLI")) {
 			MyApplication.s_obd_FLI = jsonObject.getString("FLI");
-		}
+		} 
 
 		if (jsonObject.has("MPH")) {
 			MyApplication.s_obd_MPH = jsonObject.getString("MPH");
@@ -257,7 +528,8 @@ public class Client extends Thread {
 		if (jsonObject.has("clientID")) {// 与mk5 连接的id ，确定为我和mk5通信那个模块的id
 			String clientID = jsonObject.getString("clientID");
 			this.clientID = clientID;
-			Log.i("Manager1", "[clientID]: " + this.clientID + "!!");
+			Log.i(TAG, "[clientID]: " + this.clientID + "!!");
+			
 		}
 		/*
 		 * 删除指定的ID
@@ -265,11 +537,18 @@ public class Client extends Thread {
 		if (jsonObject.has("deleteID")) {// 删除接受到的
 											// mk5的id//删除附近的车辆，让它不在UI上显示车辆的位置
 			int deleteid = jsonObject.getInt("deleteID");
-			if (Other_Car_map.containsKey(deleteid)) {
-				Other_Car_map.remove(deleteid);
-			}
-
+		    if (OverlayDemo.addMarkerFromMk5.containsKey(deleteid)) {
+		    	Intent intent = new Intent("com.liu.client.deleteid");
+		    	intent.putExtra("deletedId", deleteid);
+		    	MyApplication.getcontext().sendBroadcast(intent);
+		    	Log.i(TAG, "deleteId always in addMarkerFrom Mk5 ---------------");
+		    }
+		    Log.i(TAG, "deleteId is ---------" + deleteid);
+//			if (Other_Car_map.containsKey(deleteid)) {
+//				Other_Car_map.remove(deleteid);
+//			}
 		}
+		
 		if (jsonObject.has("addID")) {// 添加id，
 
 			int addid = jsonObject.getInt("addID"); // 把addID的值赋值给addid
@@ -296,37 +575,12 @@ public class Client extends Thread {
 			}
 		}
 
-		/*
-		 * 防撞预警 //以前的防撞预警——张卓鹏
-		 */
-		// if (jsonObject.has("anticollision_mode")) {
-		// /*
-		// * stateMode == 1 || stateMode == 2 为跟驰模式 stateMode == 3 ||
-		// * stateMode == 6 为弯道模式 stateMode == 4 || stateMode == 5 为超车模式
-		// */
-		//
-		// MyApplication.MK5CarwarnningReciveTime = System.currentTimeMillis();
-		// int stateMode = jsonObject.getInt("anticollision_mode");
-		// Log.i("预警", "接受 防撞预警信息 ----anticollision_mode 中 statMode 是： "
-		// + stateMode);
-		// /*
-		// * 在接收端已经判断，carwarningFlag=stateMode，1&&2为“1”，3&& 6为“3”，4&&5为“4”
-		// */
-		// if (stateMode == 1 || stateMode == 2) {
-		// stateMode = 1;
-		// } else if (stateMode == 3 || stateMode == 6) {
-		// stateMode = 3;
-		// } else {
-		// stateMode = 4;
-		// }
-		// }
-
-//		// 防撞预警——张卓鹏测试使用
-//		if (jsonObject.has("Scene")) {// 代表防撞预警模式和等级
-//			MyApplication.MK5CarwarnningReciveTime = System.currentTimeMillis();
-//			MyApplication.MK5Scene = jsonObject.getInt("Scene");
-//			Log.i(TAG, "Scene-->" + MyApplication.MK5Scene);
-//		}
+		// 防撞预警——张卓鹏测试使用
+		if (jsonObject.has("Scene")) {// 代表防撞预警模式和等级
+			MyApplication.MK5CarwarnningReciveTime = System.currentTimeMillis();
+			MyApplication.MK5Scene = jsonObject.getInt("Scene");
+			Log.i(TAG, "Scene-->" + MyApplication.MK5Scene);
+		}
 
 		/*
 		 * MK5消息通过 msgID 来管理，包括 ACM、BSM
@@ -335,42 +589,6 @@ public class Client extends Thread {
 		if (jsonObject.has("msgID")) {
 			switch ((short) jsonObject.getInt("msgID")) {
 			case 0:
-				// /*
-				// * 车辆自身经纬度信息
-				// */
-				// if (jsonObject.has("Long_Local")) {// 自身经度信息
-				//
-				// int LongLocal = jsonObject.getInt("Long_Local");
-				//
-				// Log.i(TAG, "MK5 端 经度：----------------------------------" +
-				// "LongLocal");
-				//
-				// LongLocalNumber = LongLocal;
-				//
-				// if (LongLocal != 0 && (int) (LongLocal /
-				// MyApplication.Scal_to_Covert) != 180) {
-				// MyApplication.isMk5LatLng = true;
-				// } else {
-				// MyApplication.isMk5LatLng = false;
-				// }
-				//
-				// }
-				// if (jsonObject.has("Lat_Local")) {// 自身纬度信息
-				//
-				// Log.i(TAG, "MK5 端 经度：------------------------------------" +
-				// "Lat_Local");
-				//
-				// int LatLocal = jsonObject.getInt("Lat_Local");
-				//
-				// // Log.i(TAG, "MK5 自身 传过来的纬度：" +
-				// // String.valueOf(LatLocal));
-				//
-				// LatLocalNumber = LatLocal;
-				//
-				// MK5Flag = true;
-				//
-				// }
-				// break;
 
 			case 1:
 				// ACM(alaCarteMessage)自定义消息：
@@ -378,6 +596,7 @@ public class Client extends Thread {
 				// （2） 聊天消息
 				// （3）紧急消息发布
 
+				
 				if (jsonObject.has("emergencyMsg")) {// 紧急消息发布
 					Log.i("lijialong5", "11111");
 					String em = jsonObject.getString("emergencyMsg");
@@ -402,9 +621,7 @@ public class Client extends Thread {
 				}
 
 			case 2:
-				// BSM（BasicSafetyMessage）基础安全消息：
-				// （1）本地GPS
-				// （2）防撞预警
+				// 其他车辆的经纬度信息
 
 				// 防撞预警——张卓鹏
 				if (jsonObject.has("Scene")) {// 代表防撞预警模式和等级
@@ -416,224 +633,26 @@ public class Client extends Thread {
 				/*
 				 * 车身信息，包括本身信息和其他车辆信息
 				 */
-				int key = jsonObject.getInt("id");
-				if (Other_Car_map.containsKey(key)) {
-					Log.i(TAG, "---------有相同ID,覆盖--------------key" + key);
-					Other_Car_map.get(key).msgID = (short) jsonObject.getInt("msgID");
-					if (jsonObject.has("msgCnt")) {
-						Other_Car_map.get(key).msgCnt = (short) jsonObject.getInt("msgCnt");// 向map集合中加数据
-					}
-					if (jsonObject.has("lat")) {// 其他车辆纬度
-						Other_Car_map.get(key).lat = jsonObject.getInt("lat");
-						Log.i(TAG, "MK5 recieved other car latitude is 2:" + String.valueOf(Other_Car_map.get(key).lat));
-
-					}
-					if (jsonObject.has("long")) {// 其他车辆经度
-						Other_Car_map.get(key).longi = jsonObject.getInt("long");
-
-						Log.i(TAG, "MK5 recieved other car latitude is 2:" + String.valueOf(Other_Car_map.get(key).longi));
-
-					}
-					//
-					if (jsonObject.has("Lat_Rcv")) {// 其他车辆纬度
-						Other_Car_map.get(key).lat = jsonObject.getInt("Lat_Rcv");
-						Log.i(TAG, "MK5 recieved other car latitude is 2:" + String.valueOf(Other_Car_map.get(key).lat));
-
-					}
-					if (jsonObject.has("Long_Rcv")) {//
-						Other_Car_map.get(key).longi = jsonObject.getInt("Long_Rcv");
-
-						Log.i(TAG, "MK5 recieved other car latitude is 2:" + String.valueOf(Other_Car_map.get(key).longi));
-
-					}
-					//
-					if (jsonObject.has("Mode")) {// 代表防撞预警模式，
-						Other_Car_map.get(key).Mode = jsonObject.getInt("Mode");
-						Log.i(TAG, "Mode-->" + jsonObject.getInt("Mode"));
-
-					}
-					if (jsonObject.has("Level")) {// 代表防撞预警等级，
-						Other_Car_map.get(key).Level = jsonObject.getInt("Level ");
-						Log.i(TAG, "Level-->" + jsonObject.getInt("Level"));
-					}
-					if (jsonObject.has("id")) {
-						Other_Car_map.get(key).id = jsonObject.getInt("id");
-					}
-					if (jsonObject.has("secMark")) {
-						Other_Car_map.get(key).secMark = (short) jsonObject.getInt("secMark");
-					}
-
-					if (jsonObject.has("elev")) {
-						Other_Car_map.get(key).elev = (short) jsonObject.getInt("elev");
-					}
-
-					if (jsonObject.has("accuracy")) {
-						Other_Car_map.get(key).accuracy = jsonObject.getInt("accuracy");
-					}
-
-					if (jsonObject.has("speed")) {
-						Other_Car_map.get(key).speed = (short) jsonObject.getInt("speed");
-					}
-
-					if (jsonObject.has("heading")) {
-						Other_Car_map.get(key).heading = (short) jsonObject.getInt("heading");
-					}
-
-					if (jsonObject.has("angle")) {
-						Other_Car_map.get(key).angle = (short) jsonObject.getInt("angle");
-					}
-					if (jsonObject.has("longitude")) {// 自身的经度
-
-						// map.get(key).way.longitude = jsonObject
-						// .getInt("longitude");
-
-					}
-					if (jsonObject.has("latitude")) {// 自身的纬度
-						// map.get(key).way.latitude = jsonObject
-						// .getInt("latitude");
-
-					}
-					if (jsonObject.has("vertical")) {
-						Other_Car_map.get(key).way.vertical = (short) jsonObject.getInt("vertical");
-					}
-					if (jsonObject.has("yaw")) {
-						Other_Car_map.get(key).way.yaw = (char) jsonObject.getInt("yaw");
-					}
-					if (jsonObject.has("breaks")) {
-						Other_Car_map.get(key).breaks = (short) jsonObject.getInt("breaks");
-					}
-				} else {
-					Log.i(TAG, "---------不相同ID,添加MAP--------------key" + key);
-					Car_Data data = new Car_Data();
-					data.msgID = (short) jsonObject.getInt("msgID");
-					if (jsonObject.has("msgCnt")) {
-						data.msgCnt = (short) jsonObject.getInt("msgCnt");
-					}
-
-					if (jsonObject.has("lat")) {
-						data.lat = jsonObject.getInt("lat");
-
-						Log.i(TAG, "MK5 recieved other car latitude is 1:" + String.valueOf(data.lat));
-
-					}
-					if (jsonObject.has("long")) {
-						data.longi = jsonObject.getInt("long");
-
-						Log.i(TAG, "MK5 recieved other car longtitude is 1:" + String.valueOf(data.longi));
-
-					}
-					//
-					//
-					if (jsonObject.has("Lat_Rcv")) {// 其他车辆纬度
-						data.lat = jsonObject.getInt("Lat_Rcv");
-						Log.i(TAG, "MK5 recieved other car latitude is 2:" + String.valueOf(data.lat));
-
-					}
-					if (jsonObject.has("Long_Rcv")) {//
-						data.longi = jsonObject.getInt("Long_Rcv");
-
-						Log.i(TAG, "MK5 recieved other car latitude is 2:" + String.valueOf(data.longi));
-
-					}
-					//
-					if (jsonObject.has("Mode")) {// 代表防撞预警模式，
-						data.Mode = jsonObject.getInt("Mode");
-						Log.i(TAG, "Mode-->" + data.Mode);
-
-					}
-					if (jsonObject.has("Level")) {// 代表防撞预警等级，
-						data.Level = jsonObject.getInt("Level");
-						Log.i(TAG, "Level-->" + data.Level);
-					}
-					if (jsonObject.has("id")) {
-						data.id = jsonObject.getInt("id");
-					}
-					if (jsonObject.has("secMark")) {
-						data.secMark = (short) jsonObject.getInt("secMark");
-					}
-					if (jsonObject.has("elev")) {
-						data.elev = (short) jsonObject.getInt("elev");
-					}
-					if (jsonObject.has("accuracy")) {
-						data.accuracy = jsonObject.getInt("accuracy");
-					}
-					if (jsonObject.has("speed")) {
-						data.speed = (short) jsonObject.getInt("speed");
-					}
-					if (jsonObject.has("heading")) {
-						data.heading = (short) jsonObject.getInt("heading");
-					}
-
-					if (jsonObject.has("angle")) {
-						data.angle = (short) jsonObject.getInt("angle");
-					}
-					if (jsonObject.has("longitude")) {// 自身的经度
-						// data.way.longitude = (short) jsonObject
-						// .getInt("longitude");
-
-					}
-					if (jsonObject.has("latitude")) {// 自身的纬度
-						// data.way.latitude = (short) jsonObject
-						// .getInt("latitude");
-
-					}
-					if (jsonObject.has("vertical")) {
-						data.way.vertical = (short) jsonObject.getInt("vertical");
-					}
-					if (jsonObject.has("yaw")) {
-						data.way.yaw = (char) jsonObject.getInt("yaw");
-					}
-					if (jsonObject.has("breaks")) {
-						data.breaks = (short) jsonObject.getInt("breaks");
-					}
-					if ((data.longi > 0) && (data.lat > 0)) {
-						Other_Car_map.put(key, data);// 容错，仅吧，正的部分加入，后期还要修改
-					}
-
+				int key = jsonObject.getInt("ID");
+				
+				Log.i(TAG, "---------向Other_Car_map存储其他车辆的经纬度信息--------------" + key);
+				Car_Data data = new Car_Data();
+				data.msgID = (short) jsonObject.getInt("msgID");
+				data.lat = jsonObject.getInt("Lat_Rcv");// 其他车辆纬度
+				data.longi = jsonObject.getInt("Long_Rcv");// 其他车辆经度
+				data.id = jsonObject.getInt("ID");
+				if ((data.longi > 0) && (data.lat > 0)) {
+					Other_Car_map.put(key, data);// 容错，仅吧，正的部分加入，后期还要修改
 				}
 
-				/*
-				 * 车辆自身经纬度信息
-				 */
-				if (jsonObject.has("Long_Local")) {// 自身经度信息
-
-					int LongLocal = jsonObject.getInt("Long_Local");
-
-					Log.i("lijialong", "MK5 端 经度：" + "LongLocal");
-
-					LongLocalNumber = LongLocal;
-
-					if (LongLocal != 0 && (int) (LongLocal / MyApplication.Scal_to_Covert) != 180) {
-						MyApplication.isMk5LatLng = true;
-					} else {
-						MyApplication.isMk5LatLng = false;
-					}
-
-				}
-				if (jsonObject.has("Lat_Local")) {// 自身纬度信息
-
-					Log.i(TAG, "MK5 端 经度：" + "Lat_Local");
-
-					int LatLocal = jsonObject.getInt("Lat_Local");
-
-					// Log.i(TAG, "MK5 自身 传过来的纬度：" +
-					// String.valueOf(LatLocal));
-
-					LatLocalNumber = LatLocal;
-
-					MK5Flag = true;
-
-				}
-
-				if (jsonObject.has("VIN")) {// 自身车辆的ID号码？ 车架号 车辆唯一标识符
-					Log.i(TAG, "收到MK5 传过来的 VIN！");
-				}
-
-				if (jsonObject.has("anticollision_state")) {
-
-					Log.i("预警", "接受 防撞预警信息 ----anticollision_state  中  ");
-
-				}
+				break;
+				
+			case 3:
+				//交通灯和建议车速信息  currentState 为红绿灯的状态，为数字1、2、3。“3”是红灯状态；“2”是黄灯状态；“1”是绿灯状态
+				MyApplication.lightState = jsonObject.getInt("CurrentState");
+				MyApplication.lightRemainTime = jsonObject.getInt("TimeRemain");
+				MyApplication.adviseSpeed = jsonObject.getInt("Speed");
+				MyApplication.TrafficLightReciveTime = System.currentTimeMillis();
 				break;
 			case 11:
 				data2.msgID = (short) jsonObject.getInt("msgID");
@@ -693,6 +712,85 @@ public class Client extends Thread {
 		intent.putExtra("INFO", l + "\n");
 		context.sendBroadcast(intent);
 		intent.removeExtra("INFO");
+	}
+	
+	private void sendMotorcadeList(HashMap<Integer, String> h) {
+		Intent intent = new Intent("com.liu.Client.sendMotorcadeList");
+		Bundle bundle = new Bundle();
+		bundle.putSerializable("list", h);
+		intent.putExtras(bundle);
+		context.sendBroadcast(intent);
+		
+	}
+	
+	private void sendJoinRequest(request r) {
+		Intent intent = new Intent("com.liu.Client.sendJoinRequest");
+		intent.putExtra("joinrequest", r);
+		context.sendBroadcast(intent);
+	}
+	
+	private void sendJoinResponse(joinresponse j) {
+		Intent intent = new Intent("com.liu.Client.sendJoinResponse");
+		intent.putExtra("joinresponse", j);
+		context.sendBroadcast(intent);
+	}
+	
+	private void sendChangeHeading(selfadjust sa) {
+		Intent intent = new Intent("com.liu.Client.sendChangeHeading");
+		intent.putExtra("selfadjust", sa);
+		context.sendBroadcast(intent);
+	}
+	
+	private void sendOtherAdjust(joinadjust jd) {
+		Intent intent = new Intent("com.liu.Client.sendOtherAdjust");
+		intent.putExtra("joinadjust", jd);
+		context.sendBroadcast(intent);
+	}
+	
+	private void sendJoinFinish(String vehid) {
+		Intent intent = new Intent("com.liu.Client.sendJoinFinish");
+		intent.putExtra("finishVehid", vehid);
+		context.sendBroadcast(intent);
+	}
+	
+	private void sendDismissFormation() {
+		Intent intent = new Intent("com.liu.Client.sendDismissFormation");
+		context.sendBroadcast(intent);
+	}
+	
+	private void sendDismissedFormation(String s) {
+		Intent intent = new Intent("com.liu.Client.sendDismissedFormation");
+		intent.putExtra("dismissedId", s);
+		context.sendBroadcast(intent);
+	}
+	
+	private void sendLeaveFormation() {
+		Intent intent = new Intent("com.liu.Client.sendLeaveFormation");
+		context.sendBroadcast(intent);
+	}
+	
+	private void sendOtherLeaveFormation(leave l) {
+		Intent intent = new Intent("com.liu.Client.sendOtherLeaveFormation");
+		intent.putExtra("leave", l);
+		context.sendBroadcast(intent);
+	}
+	
+//	private void sendOtherLeaveFormation(String s) {
+//		Intent intent = new Intent("com.liu.Client.sendOtherLeaveFormation");
+//		intent.putExtra("leaveId", s);
+//		context.sendBroadcast(intent);
+//	}
+
+	private void sendOtherLeaveSuccess(leave l) {
+		Intent intent = new Intent("com.liu.Client.sendOtherLeaveSuccess");
+		intent.putExtra("leave", l);
+		context.sendBroadcast(intent);
+	}
+	
+	private void sendLeaveMsg(Boolean b) {
+		Intent intent = new Intent("com.liu.Client.sendLeaveMsg");
+		intent.putExtra("leave", b);
+		context.sendBroadcast(intent);
 	}
 
 	/*

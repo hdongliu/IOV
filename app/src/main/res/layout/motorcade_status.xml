@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" 
+    android:background="@color/white">
+    
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:orientation="horizontal">
+        <!-- 解散或者离队 -->
+        <Button 
+            android:id="@+id/veh_dismiss_btn"
+			android:layout_width="70dp"
+			android:layout_height="match_parent"
+			android:textSize="15sp"
+			android:textColor="@color/black" />
+                
+        <TextView 
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:gravity="center"
+			android:text="车辆状态"
+			android:textSize="25sp"
+			android:textColor="@color/black"/>
+        
+    </LinearLayout> 
+    
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <!-- 车队ID -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="车队ID："
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+                
+        <TextView 
+			android:id="@+id/motorcade_id"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1.5"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <!-- 车队速度 -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="车辆速度："
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+                
+        <TextView 
+			android:id="@+id/vehicle_speed"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="km/h"
+			android:textSize="20sp"
+			android:textColor="@color/black"/> 
+        
+    </LinearLayout>
+    
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <!-- 车队成员数 -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="成员数："
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <TextView 
+			android:id="@+id/motorcade_numbers"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1.5"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <!-- 车队建议速度 -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="建议速度："
+			android:textSize="20sp"
+			android:textColor="@color/black"/>        
+        <TextView 
+			android:id="@+id/vehicle_advisoryspeed"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="km/h"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>         
+    </LinearLayout>    
+    
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <!-- 车辆位置序号 -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="车辆序号："
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <TextView 
+			android:id="@+id/vehicle_ordinal"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <!-- 车辆当前距离 -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="当前距离："
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <TextView 
+			android:id="@+id/vehicle_curdistance"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="10dp"
+			android:text="m"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>         
+    </LinearLayout>     
+    
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        
+        <!-- 前车ID -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="前车ID："
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <TextView 
+			android:id="@+id/vehicle_preid"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1.25"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>           
+        <!-- 车辆建议距离 -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="建议距离："
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <TextView 
+			android:id="@+id/vehicle_advdistance"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="10dp"
+			android:text="m"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>     
+			
+    </LinearLayout>         
+</LinearLayout>

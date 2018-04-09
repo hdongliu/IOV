@@ -1,6 +1,7 @@
 package com.main.activity;
 
 import java.net.UnknownHostException;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,10 +11,13 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.yanzi.shareserver.Car_Data;
 import org.yanzi.shareserver.Client;
+import org.yanzi.shareserver.Manager;
+
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -26,6 +30,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -36,6 +41,7 @@ import android.view.View.OnTouchListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -98,6 +104,13 @@ import com.iflytek.cloud.ui.RecognizerDialogListener;
 import com.iflytek.speech.setting.IatSettings;
 import com.iflytek.speech.setting.TtsSettings;
 import com.iflytek.speech.util.JsonParser;
+import com.liu.Class.formation;
+import com.liu.Class.joinadjust;
+import com.liu.Class.joinresponse;
+import com.liu.Class.leave;
+import com.liu.Class.request;
+import com.liu.Class.selfadjust;
+import com.main.TCPService.TCPService;
 import com.main.activity.R;
 import com.main.baiduMap.Group;
 import com.main.baiduMap.Group.FBackBtnClickListener;
@@ -119,7 +132,7 @@ import Utili.Package.ViewHolder;
  */
 public class OverlayDemo extends Activity
 		implements FBackBtnClickListener, FCreakBtnClickListener, OnClickListener, OnGetRoutePlanResultListener, OnItemClickListener {
-	private static final String TAG = "OverlayDemo";
+	private final static String TAG = "liuhongdong";
 	
 	/**
 	 * MapView 是地图主控件
@@ -158,13 +171,19 @@ public class OverlayDemo extends Activity
 	public JSONObject mJson_team_invite_agree = new JSONObject();
 	public JSONObject mJson_team_invite_disagree = new JSONObject();
 	
-
+	public JSONObject json_CreateFormation = new JSONObject();
+	public JSONObject json_QueryFormation = new JSONObject();
+	public JSONObject json_JoinFormation = new JSONObject();
+	public JSONObject json_JoinRequst_Result = new JSONObject();
+	public JSONObject json_vehdismiss_formation = new JSONObject();
+	
+	
 	public SharePreferenceUtil util;
 
 	// 车群组中按钮
 	private Button btn_delGroup, groupSoundBtn, groupSend, btn_groupInvate, btn_group_inviteBack, btn_group_inviteOK,
 			btn_groupMemberBack, btn_groupMember_name, groupInvite_agree_btn, groupInvite_cancel_btn, btn_create_group,
-			myLocation, btn_exist_gruop, btn_carGroup, btn_cargroup_back, Mk5_button, btn_mk5function_back;
+			myLocation, btn_exist_gruop, btn_carGroup, btn_cargroup_back, Mk5_button, btn_mk5function_back, group_chat_btn;
 	private EditText groupInput, EditText_invite_group_name, inviteUser;
 	private LinearLayout groupInvite_linearlayout, groupInviteApply;
 	private TextView group__invite_apply_name, group_apply_start, group_apply_end;
@@ -180,7 +199,88 @@ public class OverlayDemo extends Activity
 	private AskAnswerRegister askAnswerRegister;
 	private AnnouncementRegister announcementRegister;
 	private GroupExistRegister groupExistRegister;
+	private DeleteIdReceiver deleteIdReceiver;
+	private MotorcadeListReceiver motorcadeListReceiver;
+	private JoinRequestReceiver joinRequestReceiver;
+	private JoinResponseReceiver joinResponseReceiver;
+	private ChangeHeadingReceiver changeHeadingReceiver;
+	private OtherAdjustReceiver otherAdjustReceiver;
+	private JoinFinishReceiver joinFinishReceiver;
+	private DismissFormationReceiver dismissFormationReceiver;
+	private DismissedFormationReceiver dismissedFormationReceiver;
+	private LeaveFormationReceiver leaveFormationReceiver;
+	private OtherLeaveFormationReceiver otherLeaveFormationReceiver;
+	private OtherLeaveSuccessReceiver otherLeaveSuccessReceiver;
+	private LeaveMsgReceiver leaveMsgReceiver;
+	
+	// 车辆编队的按钮
+    private Button MK5_formation_trigger, btn_formation, btn_queryformation, btn_MK5formation_back;
 
+    // 创建编队页面相关的布局，编辑框和按钮
+    private RelativeLayout create_formation_layout;
+    public static EditText formationName, formationStart, formationEnd;
+    private Button btn_formation_back, btn_formation_creat;
+    
+    // 创建编队回复的界面
+    private RelativeLayout create_formation_response_layout;
+    private TextView formationid_text;
+    
+    // 车队状态界面
+    private RelativeLayout motorcade_status_layout;
+    private TextView motorcade_id, motorcade_numbers, motorcade_ordinal,pre_vehid, 
+    vehicle_speed, vehicle_advisoryspeed, vehicle_curdistance, vehicle_advdistance;
+    private Button veh_dismiss_btn;
+    
+    // 车队列表界面
+    private RelativeLayout motorcade_list_layout;
+    private ListView motorcadelist_listview;
+    public static HashMap<Integer, formation> motorcade_arraylist = new HashMap<Integer, formation>();
+    //编队车辆位置标志位
+    private Boolean formationMarkerFlag = true;
+    
+    // 车队详细界面
+    private RelativeLayout motorcadeinfo_layout;
+    private TextView motorcadeinfo_id, motorcadeinfo_numbers, motorcadeinfo_name, 
+    motorcadeinfo_type, motorcadeinfo_start, motorcadeinfo_end;
+    
+    // 入队请求界面
+    private RelativeLayout joinrequestinfo_layout;
+    private Button joinrequest_agree_btn, joinrequest_reject_btn;
+    private TextView joinrequest_vehid, joinrequest_quadrant, joinrequest_distance;
+    
+    // 入队请求的回复界面
+    private RelativeLayout joinresponseinfo_layout;
+    private TextView joinresponse_info, joinresponse_id, joinresponse_result,
+            joinresponse_preid, joinresponse_behid, joinresponse_chghd;
+    
+    // 入队请求同意后，车队中其他车辆的调整
+    private RelativeLayout entranceprompt_otheradjust;
+    private TextView otheradj_advspeed, otheradj_advdistance, 
+            otheradj_curdistance, otheradj_joincarnum;
+    
+    //入队请求同意后，入队车辆的入队提示
+    private RelativeLayout entranceprompt_layout;
+    private TextView entranceprompt_text;
+    
+    //入队请求同意后，入队车辆的入队完成提示
+    private RelativeLayout entrancefinish_layout;
+    private TextView finish_vehid;
+    
+    //头车解散编队
+    private RelativeLayout dismissformation_layout;
+    private TextView dismissInfo;
+    
+    //离队提醒
+    private RelativeLayout leaveformation_layout;
+    
+    //车队 中有车辆离队，通知其他车辆有车离队
+    private RelativeLayout otherleaveformation_layout;
+    private TextView leaveVehid;
+    //车队 中有车辆离队,设置它的离队标准位
+    private Boolean leaveFlag = false;
+    //有车入队,设置它的入队标准位
+    private Boolean entryFlag = false;
+    
 	private ChatMsgViewAdapter mAdapter;// 消息视图的Adapter
 
 	private BitmapDescriptor mIconMaker;
@@ -190,6 +290,7 @@ public class OverlayDemo extends Activity
 	private Button chat_display_btn, chat_close_btn;
 	private RelativeLayout cargroup_chat_Relative;// 车车聊天相对布局
 	private LinearLayout cargroup_button;// 车群组相关按钮
+	private LinearLayout formation_LinearLayout; //车辆编队按钮布局
 	private LinearLayout Mk5fuction_LinearLayout;// mk5相关业务按钮
 	private LinearLayout obd_linearlayout;// OBD线性布局
 	MsgReceiver msgReceiver = null;
@@ -228,10 +329,8 @@ public class OverlayDemo extends Activity
 	private TextView tv_vbat, tv_rpm, tv_spd, tv_tp, tv_lod, tv_ect, tv_fli, tv_mph;
 	// 交通灯
 	private RelativeLayout light;
-	private TextView lightText;
-	private ImageView green;
-	private ImageView yellow;
-	private ImageView red;
+	private ImageView light_left, light_straight, light_right;
+	private TextView straight_remain;
 	// 申明全局变量
 	private Button mBtn_chat_Send, mBtn_chat_Sound;// 聊天的发送与点击说话按钮
 	private MyApplication application;
@@ -246,6 +345,8 @@ public class OverlayDemo extends Activity
 	private Button mBtn_obd_dsp_return;// OBD显示弹框不显示
 	private Button mBtn_trafficlight_display;// 交通灯显示
 	private LinearLayout trafficlight_linearlayout;
+	private LinearLayout advisespeed_linearlayout;//交通灯处建议速度布局
+	private TextView advise_speed;//交通灯处建议速度
 	// 消息推送
 	private RelativeLayout houtai_ifo_rl_layout;
 	private TextView MK5_tv_push_ifo;
@@ -273,11 +374,34 @@ public class OverlayDemo extends Activity
 	private ListView mListView_cargroup;
 	
 	protected Car_Data car_info;
-
-
+	
+	// 存储mk5发送来的其他车辆经纬度的标注图标
+	public static HashMap<Integer, Marker> addMarkerFromMk5 = new HashMap<Integer, Marker>();
+	
+	// 存储服务器发送来的车队中车辆经纬度的标注图标
+    private static HashMap<Integer, Marker> carGroupMarkerFromCloud = new HashMap<Integer, Marker>();
+    
+    // 存储编队中车辆经纬度的标注图标
+    private static HashMap<String, Marker> formationMarker = new HashMap<String, Marker>();
+    
+    // 从mk5接收到的当前编队的成员信息
+    private static HashMap<String, String> formationVehid = new HashMap<String, String>();
+    
+    private static String vin;
+    private static int intVin;
+  //定义Map集合 存储后台发过来判断后的群组成员位置信息
+  	public static HashMap<Integer, Car_Data> cargroup_member_Location = new HashMap<Integer, Car_Data>();
+  	public static HashMap<String, Car_Data> cargroup_member_LocationWithUsername = new HashMap<String, Car_Data>();
+ // 存储需要移除的车队成员的VIN
+ 	public static List<Integer> cargroup_member_LocationRemove = new ArrayList<Integer>();
+ 	
+ 	private LatLng FormationSelfLatLng = null;//编队本车的经纬度
+ 	private DecimalFormat df = new DecimalFormat("0.00");
+ 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
 		// 设置屏幕旋转
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		
@@ -306,27 +430,32 @@ public class OverlayDemo extends Activity
 		initMapClickEvent();// 点击地图图标事件注册，主要作用是吧
 		UI_handler();
 		new Thread(new Runnable() {
-
 			int count = 0;
 			int tmpcount = 0;
             int countlatlng = 0;
             int count_dismiss = 0;
+            int formationcount = 0;
 			public void run() {
 				while (true) {
 					count++;
 					tmpcount++;
 					countlatlng++;
 					count_dismiss++;
-					if (MyApplication.lightState != 0) {// 交通灯显示
+					formationcount++;
+					if (MyApplication.lightState != 0) {// 交通灯和建议车速显示
 						myHandler.sendEmptyMessage(0x001);
+					} 
+					else if (MyApplication.lightState == 0){
+						myHandler.sendEmptyMessage(0x0011);//清除交通灯和建议车速
 					}
+					
 					if (MyApplication.OBDFlag_display) {// OBD显示
 						myHandler.sendEmptyMessage(0x002);
 					}
 					if (MyApplication.MK5InfoFlag || (MyApplication.houtai_msg_push != null)) {// 消息推送
 						myHandler.sendEmptyMessage(0x003);
 					}
-					if ((!ServiceClient.cargroup_member_Location.isEmpty()) && (count >= 20)) {// 其他车辆
+					if ((!ServiceClient.cargroup_member.isEmpty()) && (count >= 5)) {// 其他车辆
 						myHandler.sendEmptyMessage(0x004);// 添加车队成员信息位置
 						count = 0;// 保证更新车的图标2秒一次
 					}
@@ -335,22 +464,25 @@ public class OverlayDemo extends Activity
 //						 Log.i(TAG, "myHandler01-------------------------------------");
 						myHandler.sendEmptyMessage(0x005);
 					}
-					if (MyApplication.Lat_From_MK5 > 0) {
-						myHandler.sendEmptyMessage(0x006);// 显示MK5发来的本车图标
-					}
+//					if (MyApplication.Lat_From_MK5 > 0) {
+//						myHandler.sendEmptyMessage(0x006);// 显示MK5发来的本车图标
+//					}
 					
-					if ( (MyApplication.team_dismiss) && (count_dismiss>=20)) {
+					if ( (MyApplication.team_dismiss) && (count_dismiss >= 20)) {
 						
 						myHandler.sendEmptyMessage(0x007);// 车队解散 清除地图上关于群组的信息
 						
 						MyApplication.team_dismiss = false;
 						count_dismiss = 0;
-					}
+					}            
 					
 					// 防撞预警--张卓鹏
 					if (1 == MyApplication.MK5Scene / 1000) { // ***1.交叉路口碰撞预警
 						myHandler.sendEmptyMessage(0x008);
 					}
+																																		
+										 
+	  
 					if (2 == MyApplication.MK5Scene / 1000) { // 2.左转辅助
 						myHandler.sendEmptyMessage(0x009);
 					}
@@ -411,9 +543,42 @@ public class OverlayDemo extends Activity
 //					if (0 == MyApplication.MK5Scene) { // ***0.清除警示图片
 //						myHandler.sendEmptyMessage(0x049);
 //					}
-										
+					
+					//创建编队回复
+					if (MyApplication.createstatus) {
+						myHandler.sendEmptyMessage(0x027);
+					}
+					
+					//2s后隐藏回复界面
+					if ((System.currentTimeMillis() - MyApplication.rcvTime_cfresponse >= 2000) && (MyApplication.rcvTime_cfresponse != 0)) {
+						MyApplication.createstatus = false;
+						MyApplication.rcvTime_cfresponse = 0;
+						myHandler.sendEmptyMessage(0x028);
+					}
+					
+					//更新编队的状态
+					if ((!Client.formation_status.isEmpty()) && (formationcount >= 5)) {// 其他车辆
+						myHandler.sendEmptyMessage(0x029);
+						formationcount = 0;// 保证更新编队的状态2秒一次
+						Log.i(TAG, "更新编队车辆图标！");
+					}
+					
+					//更新车辆状态
+					if (!TextUtils.isEmpty(MyApplication.localvehid)) {
+						myHandler.sendEmptyMessage(0x030);
+						Log.i("liuhongdong", "更新车辆状态-----------"+MyApplication.localvehid);
+					}
+					
+					// 读取显示车队列表
+//					if (!Client.motorcade_list.isEmpty()) {
+//						Log.i(TAG, "motorcade_list is  not empty----------");
+//						myHandler.sendEmptyMessage(0x030);
+//					}
+				
+					
+					
                     //给服务器发送车辆的经纬度信息
-					if (Util.isNetworkAvailable(OverlayDemo.this) && (countlatlng >= 20)){
+					if (Util.isNetworkAvailable(OverlayDemo.this) && (countlatlng >= 10)){
 						countlatlng = 0;
 						if (MyApplication.isMk5LatLng) {
 							if (MyApplication.isServerConnect){
@@ -422,6 +587,7 @@ public class OverlayDemo extends Activity
 									mJson_to_clound.put("veh_heading", (int) MyOrientationListener.lastX);
 									mJson_to_clound.put("veh_id", MyApplication.user_name);
 									mJson_to_clound.put("fromtype", "veh");
+									mJson_to_clound.put("VIN", String.valueOf(Client.idLocal));//MK5发送来的车辆Id
 									mJson_to_clound.put("veh_lat", String.valueOf(desLatLng1.latitude));
 									mJson_to_clound.put("veh_lon", String.valueOf(desLatLng1.longitude));
 									mJson_to_clound.put("veh_speed", "0");
@@ -443,6 +609,7 @@ public class OverlayDemo extends Activity
 									mJson_to_clound.put("veh_heading", (int) MyOrientationListener.lastX);
 									mJson_to_clound.put("veh_id", MyApplication.user_name);
 									mJson_to_clound.put("fromtype", "veh");
+									mJson_to_clound.put("VIN", String.valueOf(MyApplication.randomVin));
 									mJson_to_clound.put("veh_lat", String.valueOf(mCurrentLat));
 									mJson_to_clound.put("veh_lon", String.valueOf(mCurrentLon));
 									mJson_to_clound.put("veh_speed", "0");
@@ -638,28 +805,80 @@ public class OverlayDemo extends Activity
 	private void UI_handler() {
 		myHandler = new Handler() {
 			public void handleMessage(Message msg) {
+				//显示交通灯和建议速度
 				if (msg.what == 0x001) {
-					switch (MyApplication.lightState) {
-					case 1:// 绿
-						Display_Green();
-
-						break;
-					case 2:// yellow
-						Display_Yellow();
-
-						break;
-					case 3:// red
-						Display_Red();
-
-						break;
-					case 4:// yellow
-						Display_Yellow();
-						break;
-
-					default:
-						break;
+					//显示交通灯
+					light.setVisibility(View.VISIBLE);
+					trafficlight_linearlayout.setVisibility(View.VISIBLE);
+					//左转
+					if (3 == (MyApplication.lightState / 100)) {
+						light_left.setImageResource(R.drawable.red_left);
+						light_left.setVisibility(View.VISIBLE);
+					} else if (2 == (MyApplication.lightState / 100)) {
+						light_left.setImageResource(R.drawable.yellow_left);
+						light_left.setVisibility(View.VISIBLE);
+					} else if (1 == (MyApplication.lightState / 100)) {
+						light_left.setImageResource(R.drawable.green_left);
+						light_left.setVisibility(View.VISIBLE);
 					}
+					
+					//直行
+                    if (3 == ((MyApplication.lightState % 100) /10)) {
+						light_straight.setImageResource(R.drawable.red_straight);
+						light_straight.setVisibility(View.VISIBLE);
+						straight_remain.setText(String.valueOf(MyApplication.lightRemainTime));
+						straight_remain.setTextColor(Color.RED);
+					} else if (2 == ((MyApplication.lightState % 100) /10)) {
+						light_straight.setImageResource(R.drawable.yellow_straight);
+						light_straight.setVisibility(View.VISIBLE);
+						straight_remain.setText(String.valueOf(MyApplication.lightRemainTime));
+						straight_remain.setTextColor(Color.YELLOW);
+					} else if (1 == ((MyApplication.lightState % 100) /10)) {
+						light_straight.setImageResource(R.drawable.green_straight);
+						light_straight.setVisibility(View.VISIBLE);
+						straight_remain.setText(String.valueOf(MyApplication.lightRemainTime));
+						straight_remain.setTextColor(Color.GREEN);
+					}
+					
+                    //右转
+                    if (3 == (MyApplication.lightState % 10)) {
+						light_right.setImageResource(R.drawable.red_right);
+						light_right.setVisibility(View.VISIBLE);
+					} else if (2 == (MyApplication.lightState % 10)) {
+						light_right.setImageResource(R.drawable.yellow_right);
+						light_right.setVisibility(View.VISIBLE);
+					} else if (1 == (MyApplication.lightState % 10)) {
+						light_right.setImageResource(R.drawable.green_right);
+						light_right.setVisibility(View.VISIBLE);
+					}
+                    
+                    //显示建议速度
+                    if (MyApplication.adviseSpeed != 0) {
+                        advisespeed_linearlayout.setVisibility(View.VISIBLE);
+                        advise_speed.setText(String.valueOf(MyApplication.adviseSpeed));
+                    } else {
+                    	advisespeed_linearlayout.setVisibility(View.GONE);
+                    }
+                    
 				}
+				//清理交通灯和建议速度
+				if (msg.what == 0x0011) {
+					light.setVisibility(View.GONE);
+					trafficlight_linearlayout.setVisibility(View.GONE);
+					
+					advisespeed_linearlayout.setVisibility(View.GONE);
+					MyApplication.adviseSpeed = 0;
+				}
+				
+				// 当没有收到交通灯信息，3s之后消失  
+				if (System.currentTimeMillis() - MyApplication.TrafficLightReciveTime >= MAX_LIMIT_TIME) {
+					trafficlight_linearlayout.setVisibility(View.GONE);
+					advisespeed_linearlayout.setVisibility(View.GONE);
+					MyApplication.lightState = 0;
+					MyApplication.lightRemainTime = 0;
+					MyApplication.adviseSpeed = 0;
+				}
+				
 				if (msg.what == 0x002) {
 					Display_OBD();
 
@@ -669,15 +888,16 @@ public class OverlayDemo extends Activity
 
 				}
 				if (msg.what == 0x004) {// 车队成员位置显示
-					addInfosOverlayHashMap(ServiceClient.cargroup_member_Location);
+					addInfosOverlayHashMap(ServiceClient.cargroup_member);
+					
 				}
 				
 				if (msg.what == 0x005) {
-					mBaiduMap.clear();// 为了防止MK5发来的GPS有细小改变，每次更新UI时，先把地图清一下
+//					mBaiduMap.clear();// 为了防止MK5发来的GPS有细小改变，每次更新UI时，先把地图清一下
 					setStaticDataToInfoHashMap();// 
 				}
 				if (msg.what == 0x006) {
-					Util.Display_MyLoc_Marker(mBaiduMap);//显示本车的位置
+//					Util.Display_MyLoc_Marker(mBaiduMap);//显示本车的位置
 				}
 				if (msg.what == 0x007) {
 					mBaiduMap.clear();
@@ -686,42 +906,46 @@ public class OverlayDemo extends Activity
 				// 防撞预警警示
 				if (0x008 == msg.what) { // ***1.交叉路口碰撞预警
 					if (3 == MyApplication.MK5Scene % 10) { // 声音警示
+											
 						if (true == Sound_Switch) {
-							mTts.startSpeaking("注意，前方交叉路口可能发生碰撞危险，请谨慎驾驶", mTtsListener);
+							mTts.startSpeaking("前方路口有碰撞危险", mTtsListener);
 //							MyApplication.MK5Scene = 0 ; //直接清空原来发送过来的Scene值之后，图片无法消失（UIhandler无法进入？）
 						}
 					}
 					if (1 == (MyApplication.MK5Scene % 100)/10) { // 左侧路口
 						anti_collision_linearlayout.setVisibility(View.VISIBLE);
-						anti_collision_linearlayout.setBackgroundResource(R.drawable.image_view_car_warning1011);
+						anti_collision_linearlayout.setBackgroundResource(R.drawable.warning1011);
 					}
 					if (2 == (MyApplication.MK5Scene % 100)/10) { // 右侧路口
 						anti_collision_linearlayout.setVisibility(View.VISIBLE);
-						anti_collision_linearlayout.setBackgroundResource(R.drawable.image_view_car_warning1021);
+						anti_collision_linearlayout.setBackgroundResource(R.drawable.warning1021);
 					}
 				}
 				 if (0x010 == msg.what) { // ***3.紧急制动预警
 					 if (3 == MyApplication.MK5Scene % 10) { // 声音警示
 							if (true == Sound_Switch) {
-								mTts.startSpeaking("注意，前方车辆紧急刹车，请谨慎驾驶", mTtsListener);
+								mTts.startSpeaking("前方车辆紧急刹车", mTtsListener);
 							}
 					 }
 					 anti_collision_linearlayout.setVisibility(View.VISIBLE);
-					 anti_collision_linearlayout.setBackgroundResource(R.drawable.image_view_car_warning3001);
+					 anti_collision_linearlayout.setBackgroundResource(R.drawable.warning3001);
+											
+	  
 				 }
-				if (0x011 == msg.what) { // ***4.逆向超车碰撞预警
-					if (3 == MyApplication.MK5Scene % 10) {			
-						if (true == Sound_Switch) {
-							mTts.startSpeaking("注意，当前路段超车可能发生碰撞危险，请谨慎驾驶", mTtsListener);
-						}
-					}
-					anti_collision_linearlayout.setVisibility(View.VISIBLE);
-					anti_collision_linearlayout.setBackgroundResource(R.drawable.image_view_car_warning_overtaking);
-				}
+		
+//				if (0x011 == msg.what) { // ***4.逆向超车碰撞预警
+//					if (3 == MyApplication.MK5Scene % 10) {			
+//						if (true == Sound_Switch) {
+//							mTts.startSpeaking("当前路段超车可能发生碰撞危险，请谨慎驾驶", mTtsListener);
+//						}
+//					}
+//					anti_collision_linearlayout.setVisibility(View.VISIBLE);
+//					anti_collision_linearlayout.setBackgroundResource(R.drawable.image_view_car_warning_overtaking);
+//				}
 				if (0x012 == msg.what) { // ***5.逆向行驶告警（会车）
 					if (3 == MyApplication.MK5Scene % 10) {				
 						if (true == Sound_Switch) {
-							mTts.startSpeaking("注意，当前路段会车可能发生碰撞，请谨慎驾驶", mTtsListener);
+							mTts.startSpeaking("当前路段会车可能发生碰撞", mTtsListener);
 						}
 					}
 					anti_collision_linearlayout.setVisibility(View.VISIBLE);
@@ -730,94 +954,265 @@ public class OverlayDemo extends Activity
 				 if (0x014 == msg.what) { // ***7.前方静止/慢速车辆告警
 					 if (3 == MyApplication.MK5Scene % 10) {				
 							if (true == Sound_Switch) {
-								mTts.startSpeaking("注意，前方车辆行驶缓慢，请谨慎驾驶", mTtsListener);
+								mTts.startSpeaking("前方车辆行驶缓慢", mTtsListener);
 							}
 					 }
 					 anti_collision_linearlayout.setVisibility(View.VISIBLE);
-					 anti_collision_linearlayout.setBackgroundResource(R.drawable.image_view_car_warning7001);
+					 anti_collision_linearlayout.setBackgroundResource(R.drawable.warning7001);
 				 }
+	  
+		
+		
 				if (0x024 == msg.what) { // ***17.前向碰撞预警
+															 
+												 														
 					if (3 == MyApplication.MK5Scene % 10) {
 						if (true == Sound_Switch) {
-							mTts.startSpeaking("注意，前方车辆可能发生碰撞危险，请谨慎驾驶", mTtsListener);
+							mTts.startSpeaking("前方车辆碰撞危险", mTtsListener);
 						}
 					}
 					anti_collision_linearlayout.setVisibility(View.VISIBLE);
-					anti_collision_linearlayout.setBackgroundResource(R.drawable.image_view_car_warning17001);
+					anti_collision_linearlayout.setBackgroundResource(R.drawable.warning17001);
 				}
+	
 				if (0x026 == msg.what) { // ***19.后方碰撞预警
+															 
+																										 
 					if (3 == MyApplication.MK5Scene % 10) {
 						if (true == Sound_Switch) {
-							mTts.startSpeaking("注意，后方车辆可能发生碰撞危险，请谨慎驾驶", mTtsListener);
+							mTts.startSpeaking("后方车辆碰撞危险", mTtsListener);
 						}
 					}
 					anti_collision_linearlayout.setVisibility(View.VISIBLE);
-					anti_collision_linearlayout.setBackgroundResource(R.drawable.image_view_car_warning19001);
+					anti_collision_linearlayout.setBackgroundResource(R.drawable.warning19001);
 				}
 				if (0x048 == msg.what) { // ***41.会车预警
 					if (3 == MyApplication.MK5Scene % 10) {
 						if (true == Sound_Switch) {
-							mTts.startSpeaking("注意，前方车辆会车预警，请谨慎驾驶", mTtsListener);
+							mTts.startSpeaking("前方会车预警", mTtsListener);
 						}
 					}
 					anti_collision_linearlayout.setVisibility(View.VISIBLE);
-					anti_collision_linearlayout.setBackgroundResource(R.drawable.image_view_car_warning41001);
+					anti_collision_linearlayout.setBackgroundResource(R.drawable.warning41001);
 				}
 				
 //				// 当MK5发送0消息时，清除图片
 //				if (0x049 == msg.what) { // ***0.清除警示图片
 //					anti_collision_linearlayout.setVisibility(View.GONE);
 //				}
-				// 当预警图片显示3s之后消失
+				// 当预警图片显示3s之后消失  
 				if (System.currentTimeMillis() - MyApplication.MK5CarwarnningReciveTime >= MAX_LIMIT_TIME) {
 					anti_collision_linearlayout.setVisibility(View.GONE);
 					MyApplication.MK5Scene = 0;
 				}
+				
+				// 显示创建编队的回复页面
+				if (0x027 == msg.what) {
+					create_formation_response_layout.setVisibility(View.VISIBLE);
+					formationid_text.setText("车队ID：" + MyApplication.formationid);
+				}
+				
+				// 隐藏创建编队的回复页面 同时开启车队状态的页面
+				if (0x028 == msg.what) {
+					create_formation_response_layout.setVisibility(View.GONE);
+					veh_dismiss_btn.setText("解散");
+					motorcade_status_layout.setVisibility(View.VISIBLE);
+
+				}
+				
+				// 更新编队图标的状态
+				if (0x029 == msg.what) {
+				    updateFormationStatus(Client.formation_status);
+				}
+				
+				
+				// 更新车辆状态
+				if (0x030 == msg.what) {
+					motorcade_id.setText(MyApplication.formationid);
+					motorcade_numbers.setText(String.valueOf(MyApplication.vehicle_numbers));
+					motorcade_ordinal.setText(String.valueOf(MyApplication.vehnum));
+					pre_vehid.setText(String.valueOf(MyApplication.prevehid));
+					vehicle_speed.setText(String.valueOf(df.format(MyApplication.curspeed)));
+					vehicle_advisoryspeed.setText(String.valueOf(df.format(MyApplication.advdistance)));
+					vehicle_curdistance.setText(String.valueOf(df.format(MyApplication.curdistance)));
+					vehicle_advdistance.setText(String.valueOf(df.format(MyApplication.advdistance)));//Math.floor(MyApplication.advdistance)
+				}
+				
 			}
 		};
 
 	}
+	
+	
+	
+	// 更新编队的状态
+	private void updateFormationStatus(final HashMap<String, String> formationStatus) {
+		
+	    if (formationMarkerFlag) {
+	    	formationMarkerFlag = false;
+//		
+		
+		    //获取当前编队的成员vehid
+		    for (String formationid : formationStatus.keySet()) {
+		    	try {
+		    		JSONArray jsonArray = new JSONArray(formationStatus.get(formationid));
+				    for (int i = 0; i < jsonArray.length(); i++) {
+				        JSONObject vehicleStatus = jsonArray.getJSONObject(i);
+				       
+				        String vehid = vehicleStatus.getString("vehid");
+				        formationVehid.put(vehid, "vehid");
+				        Log.w("liuhongdong", "此次的车辆id为："+vehid);
+				    }
+				    
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+		    	
+		    }
+		    
+//	    	//移除已经离队车辆的图标
+		    if (!formationMarker.isEmpty()) {
+				for (int i = 0; i < formationMarker.keySet().size(); i++) {
+					Log.w("liuhongdong", "formationMarker中车辆id为："+formationMarker.keySet().toArray()[i]);
+					if (!formationVehid.containsKey(formationMarker.keySet().toArray()[i])) {
+						Log.i("liuhongdong", "此次的移除车辆id为："+formationMarker.keySet().toArray()[i]);
+						formationMarker.get(formationMarker.keySet().toArray()[i]).remove();
+						formationMarker.remove(formationMarker.keySet().toArray()[i]);
+						
+					}
+				}
+				formationVehid.clear();
+		    }
+
+	    	
+			new Thread() {
+				private BitmapDescriptor mIconMaker;
+				private InfoWindow mInfoWindow;
+				View view = LayoutInflater.from(OverlayDemo.this).inflate(R.layout.marker_layout, null);
+				TextView tv_num_price=(TextView) view.findViewById(R.id.tv_num_price);
+				
+				public void run() {
+					OverlayOptions overlayOptions = null;
+					Marker marker = null;
+					for (String formationid : formationStatus.keySet()) {
+						
+						try {
+							JSONArray jsonArray = new JSONArray(formationStatus.get(formationid));
+						    for (int i = 0; i < jsonArray.length(); i++) {
+						        JSONObject vehicleStatus = jsonArray.getJSONObject(i);
+						        if (!vehicleStatus.getString("vehid").equals(MyApplication.localvehid)) {
+						            double longi = vehicleStatus.getDouble("vehlon");
+						            double lat = vehicleStatus.getDouble("vehlat");
+						            String vehid = vehicleStatus.getString("vehid");
+						            
+						            LatLng sourceLatLng = new LatLng((double) lat, (double) longi);// 纬度，经度 
+									// 转换成百度地图需要的经纬度
+									CoordinateConverter converter = new CoordinateConverter();
+									converter.from(CoordinateConverter.CoordType.GPS);
+									converter.coord(sourceLatLng);
+									LatLng BDLatLng = converter.convert();
+									
+									Log.i("liuhongdong", "GPS原始经纬度数据：纬度"+sourceLatLng.latitude+"经度"+sourceLatLng.longitude);
+									Log.i("liuhongdong", "转换后的经纬度数据：纬度"+BDLatLng.latitude+"经度"+BDLatLng.longitude);
+									
+						            if (!formationMarker.containsKey(vehid)) {
+						            	tv_num_price.setText(vehid);
+										BitmapDescriptor free_view = BitmapDescriptorFactory.fromView(view);
+										
+										overlayOptions = new MarkerOptions().position(BDLatLng).icon(free_view).zIndex(10);
+										marker = (Marker) (mBaiduMap.addOverlay(overlayOptions));
+						            	
+										formationMarker.put(vehid, marker);
+										
+						            } else {
+						            	formationMarker.get(vehid).setPosition(BDLatLng);
+						            }
+						        } else {
+						        	double longi = vehicleStatus.getDouble("vehlon");
+						            double lat = vehicleStatus.getDouble("vehlat");
+						            LatLng sourceLatLng = new LatLng((double) lat, (double) longi);// 纬度，经度 
+									// 转换成百度地图需要的经纬度
+									CoordinateConverter converter = new CoordinateConverter();
+									converter.from(CoordinateConverter.CoordType.GPS);
+									converter.coord(sourceLatLng);
+									FormationSelfLatLng = converter.convert();
+						            
+						        }
+						    	
+						    }
+							
+							
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+					}
+				}
+			
+			}.start();
+		
+			formationMarkerFlag = true;
+	    }
+	}
+	
+	
 	private void setStaticDataToInfoHashMap() {
 		if (Client.Other_Car_map.isEmpty()) {
 			return;// 如果是空，直接返回
 		}
 
-		addInfosOverlayHashMap_mk5(Client.Other_Car_map);// 把存储在Info中的信息填充到Marker点中，显示在地图上。
+		addInfosOverlayHashMap_mk5(Client.Other_Car_map, cargroup_member_Location);// 把存储在Info中的信息填充到Marker点中，显示在地图上。
 	}
-	private void addInfosOverlayHashMap_mk5(final HashMap<Integer, Car_Data> other_Car_map) {
+	private void addInfosOverlayHashMap_mk5(final HashMap<Integer, Car_Data> other_Car_map, final HashMap<Integer, Car_Data> cargroup_Location) {
 
 		new Thread() {// 一进来就开启新进程，因为网络读取图片不能再主线程中操作
-			private BitmapDescriptor mIconMaker;
+			private BitmapDescriptor mIconMaker = BitmapDescriptorFactory.fromResource(R.drawable.othercarmark_mk5);;
 
 			public void run() {
 
-				// mBaiduMap.clear();
+//				 mBaiduMap.clear();
 				OverlayOptions overlayOptions = null;
 				Marker marker = null;
+				int longi, lat;
+				LatLng sourceLatLng, otherLLWithbd09ll;
 				
 				for (Integer key : other_Car_map.keySet()) {
 					car_info = other_Car_map.get(key);
-					int longi = other_Car_map.get(key).longi;
-					int lat = other_Car_map.get(key).lat;
-					// Log.i(TAG, "longi-------->" + longi);
-					// Log.i(TAG, "lat-------->" + lat);
-					// LJL 转换成百度地图需要的经纬度
-					LatLng sourceLatLng = new LatLng(((double) lat / MyApplication.Scal_to_Covert),
-							((double) longi / MyApplication.Scal_to_Covert));// 纬度，经度
-
-					mIconMaker = BitmapDescriptorFactory.fromResource(R.drawable.maker);// 把图片转化为BitmapDescriptor格式
-
-					overlayOptions = new MarkerOptions().position(Util.GPS_Covert(sourceLatLng)).icon(mIconMaker)
-							.zIndex(5);// zIndex没什么用
-					marker = (Marker) (mBaiduMap.addOverlay(overlayOptions));
-					// 额外的信息需要用Bundle存储该marker点的Info数据源
-					// 存入的信息放入键值对中，每次都NEW一个Bundle对象
-					// 取出时只需要用marker.getExtraInfo().get("info");
-					Bundle bundle = new Bundle();// bundel类似于session
-					bundle.putSerializable("Car_info", car_info);
-					marker.setExtraInfo(bundle);// 把INFO信息存入marker点中
+					longi = other_Car_map.get(key).longi;
+					lat = other_Car_map.get(key).lat;
+					//判断经纬度的位数
+					if ((lat / 100000000) > 0 && (longi / 1000000000) > 0) {
+						sourceLatLng = new LatLng(((double) lat / MyApplication.Scal_to_Covert7),
+								((double) longi / MyApplication.Scal_to_Covert7));// 纬度，经度
+						
+					} else {
+						sourceLatLng = new LatLng(((double) lat / MyApplication.Scal_to_Covert5),
+								((double) longi / MyApplication.Scal_to_Covert5));// 纬度，经度
+					}
+			    	
+			    	otherLLWithbd09ll = Util.GPS_Covert(sourceLatLng);
+				    if (!cargroup_Location.containsKey(key)) {
+				    	
+				    	if (!addMarkerFromMk5.containsKey(key)) {
+							
+							overlayOptions = new MarkerOptions().position(otherLLWithbd09ll).icon(mIconMaker)
+									.zIndex(5);// zIndex没什么用
+							marker = (Marker) (mBaiduMap.addOverlay(overlayOptions));
+							addMarkerFromMk5.put(key, marker);
+				    	} else {
+				    		addMarkerFromMk5.get(key).setPosition(otherLLWithbd09ll);
+				    	}
+				    } 
+				    else {
+				    	if (addMarkerFromMk5.containsKey(key)) {
+				    		addMarkerFromMk5.get(key).remove();
+					    	addMarkerFromMk5.remove(key);
+					    	Log.d(TAG, "marker from mk5 always clear");
+				    	}
+				    	
+				    }
 				}
-				Log.d("TAG", "Finish add Markers");
 			}
 
 		}.start();
@@ -859,40 +1254,6 @@ public class OverlayDemo extends Activity
 
 	}
 
-	private void Display_Green() {
-		setTrafficLight_layout_visual();
-		green.setVisibility(View.VISIBLE);
-		red.setVisibility(View.GONE);
-		yellow.setVisibility(View.GONE);
-		// 显示交通秒数
-		lightText.setText(String.valueOf(MyApplication.lightRemainTime) + "s");
-		lightText.setTextColor(Color.GREEN);
-		lightText.setTextSize(24);
-	}
-
-	private void Display_Yellow() {
-		setTrafficLight_layout_visual();
-		green.setVisibility(View.GONE);
-		red.setVisibility(View.GONE);
-		yellow.setVisibility(View.VISIBLE);
-		// 显示交通秒数
-		lightText.setText(String.valueOf(MyApplication.lightRemainTime) + "s");
-		lightText.setTextSize(24);
-		lightText.setTextColor(Color.YELLOW);
-	}
-
-	private void Display_Red() {
-
-		setTrafficLight_layout_visual();
-		green.setVisibility(View.GONE);
-		red.setVisibility(View.VISIBLE);
-		yellow.setVisibility(View.GONE);
-		// 显示交通秒数
-		lightText.setText(String.valueOf(MyApplication.lightRemainTime) + "s");
-		lightText.setTextSize(24);
-		lightText.setTextColor(Color.RED);
-
-	}
 
 	/*
 	 * 把地图布局控制可视化
@@ -915,13 +1276,13 @@ public class OverlayDemo extends Activity
 		// 开启定位图层
 		mBaiduMap.setMyLocationEnabled(true);
 		// 定位初始化
-		mLocClient = new LocationClient(this);
+		mLocClient = new LocationClient(getApplicationContext());
 		mLocClient.registerLocationListener(myListener);
 		LocationClientOption option = new LocationClientOption();
-		option.setOpenGps(true); // 打开gps
+		option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);// 设置定位模式为高精度模式
 		option.setCoorType("bd09ll"); // 设置坐标类型
 		option.setScanSpan(1000);// 1秒一次定位
-		option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);// 设置定位模式为高精度模式
+		
 		mLocClient.setLocOption(option);
 		mLocClient.start();
 		// 初始化搜索模块，注册事件监听
@@ -950,8 +1311,15 @@ public class OverlayDemo extends Activity
 				// LJL 转换成百度地图需要的经纬度
 				CoordinateConverter converter = new CoordinateConverter();
 				converter.from(CoordinateConverter.CoordType.GPS);
-				LatLng sourceLatLng = new LatLng(((double) (Client.LatLocalNumber)) / MyApplication.Scal_to_Covert,
-						((double) (Client.LongLocalNumber)) / MyApplication.Scal_to_Covert);
+				LatLng sourceLatLng;
+				//判断经纬度的位数
+				if ((Client.LatLocalNumber / 100000000) > 0 && (Client.LongLocalNumber / 1000000000) > 0) {
+					sourceLatLng = new LatLng(((double) (Client.LatLocalNumber)) / MyApplication.Scal_to_Covert7,
+							((double) (Client.LongLocalNumber)) / MyApplication.Scal_to_Covert7);
+				} else {
+					sourceLatLng = new LatLng(((double) (Client.LatLocalNumber)) / MyApplication.Scal_to_Covert5,
+							((double) (Client.LongLocalNumber)) / MyApplication.Scal_to_Covert5);
+				}
 				converter.coord(sourceLatLng);
 				desLatLng1 = converter.convert();
 
@@ -967,6 +1335,14 @@ public class OverlayDemo extends Activity
 						.longitude(desLatLng1.longitude).build();
 				mBaiduMap.setMyLocationData(locData);
 
+			} else if (FormationSelfLatLng != null) {//编队是本车的定位数据
+				locData = new MyLocationData.Builder().accuracy(location.getRadius())
+						// 此处设置开发者获取到的方向信息，顺时针0-360
+						.direction(mCurrentDirection).latitude(FormationSelfLatLng.latitude)
+						.longitude(FormationSelfLatLng.longitude).build();
+				mBaiduMap.setMyLocationData(locData);
+				FormationSelfLatLng = null;
+				
 			} else {
 				// 如果Mk5没有发定位数据，就使用网络定位数据
 				locData = new MyLocationData.Builder().accuracy(location.getRadius())
@@ -1057,6 +1433,17 @@ public class OverlayDemo extends Activity
 		groupInvite_cancel_btn = (Button) findViewById(R.id.group_invite_cancel);
 		groupInvite_cancel_btn.setOnClickListener(this);
 		
+		//聊天
+		group_chat_btn = (Button) findViewById(R.id.group_chat);
+		group_chat_btn.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				cargroup_chat_Relative.setVisibility(View.VISIBLE);
+			}
+		});
+		
 		btn_cargroup_back = (Button) findViewById(R.id.cargroup_back);
 		btn_cargroup_back.setOnTouchListener(new OnTouchListener() {
 			@Override
@@ -1107,25 +1494,14 @@ public class OverlayDemo extends Activity
 		cargroup_chat_Relative = (RelativeLayout) findViewById(R.id.car_group);
 		cargroup_chat_Relative.setVisibility(View.GONE);
 
-		// 隐藏组件群组聊天布局与显示
-		chat_display_btn = (Button) findViewById(R.id.chat_display_trigger);
-		chat_display_btn.setOnTouchListener(new OnTouchListener() {
-
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				chat_display_btn.setVisibility(View.GONE);
-				cargroup_chat_Relative.setVisibility(View.VISIBLE);
-				return true;
-			}
-		});
-
 		// 关闭隐藏聊天按钮
 		chat_close_btn = (Button) findViewById(R.id.group_chat_back_btn);
-		chat_close_btn.setOnTouchListener(new OnTouchListener() {
-			public boolean onTouch(View v, MotionEvent event) {
-				chat_display_btn.setVisibility(View.VISIBLE);
+		chat_close_btn.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
 				cargroup_chat_Relative.setVisibility(View.GONE);
-				return true;
 			}
 		});
 
@@ -1174,15 +1550,21 @@ public class OverlayDemo extends Activity
 		tv_fli = (TextView) findViewById(R.id.obd_tv_fli);// OBD发来的剩余油量
 		tv_mph = (TextView) findViewById(R.id.obd_tv_mph);// OBD发来的瞬时油耗
 
+		//交通灯处建议速度
+		advisespeed_linearlayout = (LinearLayout) findViewById(R.id.advisespeed_linearlayout);
+		advisespeed_linearlayout.setVisibility(View.VISIBLE);
+		advise_speed = (TextView) findViewById(R.id.advise_speed);
+		
 		// 交通灯界面显示
 		trafficlight_linearlayout = (LinearLayout) findViewById(R.id.trafficlight_linearlayout);
-		trafficlight_linearlayout.setVisibility(View.GONE);
+		trafficlight_linearlayout.setVisibility(View.GONE);		
 		light = (RelativeLayout) findViewById(R.id.light_layout);
 		light.setVisibility(View.GONE);
-		lightText = (TextView) findViewById(R.id.traf_lig_info);
-		green = (ImageView) findViewById(R.id.green);
-		yellow = (ImageView) findViewById(R.id.yellow);
-		red = (ImageView) findViewById(R.id.red);
+		light_left = (ImageView) findViewById(R.id.light_left);
+		light_straight = (ImageView) findViewById(R.id.light_straight);
+		light_right = (ImageView) findViewById(R.id.light_right);
+		straight_remain = (TextView) findViewById(R.id.straight_remain);
+		
 		mBtn_trafficlight_display = (Button) findViewById(R.id.btn_TrafficLight);
 		mBtn_trafficlight_display.setOnClickListener(new OnClickListener() {
 
@@ -1234,9 +1616,296 @@ public class OverlayDemo extends Activity
 
 		// 防撞预警
 		anti_collision_linearlayout = (LinearLayout) findViewById(R.id.anti_collision_linearlayout);
-		anti_collision_linearlayout.setVisibility(View.GONE);
+		anti_collision_linearlayout.setVisibility(View.VISIBLE);
+//		anti_collision_linearlayout.setBackgroundResource(R.drawable.warning1011);
 		anti_collision_imgview = (ImageView) findViewById(R.id.anti_collision_imgview);
 		anti_collision_txtview = (TextView) findViewById(R.id.anti_collision_txtview);
+		
+		// 车辆编队相关按钮 整体布局
+		formation_LinearLayout = (LinearLayout) findViewById(R.id.MK5formation_LinearLayout);
+		formation_LinearLayout.setVisibility(View.GONE);
+
+		// 车辆编队相关按钮布局 的触发按钮
+		MK5_formation_trigger = (Button)findViewById(R.id.MK5_formation_trigger);
+		MK5_formation_trigger.setOnTouchListener(new OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				MK5_formation_trigger.setVisibility(View.GONE);
+				formation_LinearLayout.setVisibility(View.VISIBLE);
+				return true;
+			}
+		});
+		
+		//车辆编队相关功能按钮
+		
+		//创建编队
+		btn_formation = (Button) findViewById(R.id.btn_Formation);
+		btn_formation.setOnClickListener(this);
+		
+		//创建编队页面的布局，编辑框和按钮
+		create_formation_layout= (RelativeLayout) findViewById(R.id.create_formation_layout);
+	    formationName = (EditText) findViewById(R.id.formation_name);
+	    formationStart = (EditText) findViewById(R.id.formation_start);
+	    formationEnd = (EditText) findViewById(R.id.formation_end);
+	    btn_formation_creat = (Button) findViewById(R.id.formation_creat_btn);
+	    btn_formation_back = (Button) findViewById(R.id.formation_back_btn);
+	    create_formation_layout.setVisibility(View.GONE);
+	    btn_formation_creat.setOnClickListener(this);
+	    btn_formation_back.setOnClickListener(this);
+		
+		//查询编队
+		btn_queryformation = (Button) findViewById(R.id.btn_QueryFormation);
+		btn_queryformation.setOnClickListener(this);
+		
+		//收起编队相关功能按钮
+		btn_MK5formation_back = (Button) findViewById(R.id.MK5formation_back);
+		btn_MK5formation_back.setOnTouchListener(new OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				// TODO Auto-generated method stub
+				MK5_formation_trigger.setVisibility(View.VISIBLE);
+				formation_LinearLayout.setVisibility(View.GONE);
+				return true;
+			}
+		});
+		
+		// 创建编队回复的相关的布局和信息设置文本
+		create_formation_response_layout = (RelativeLayout) findViewById(R.id.create_formation_response_layout);
+		formationid_text = (TextView) findViewById(R.id.formationid_textview);
+	    create_formation_response_layout.setVisibility(View.GONE);
+//	    formationid_text.setText("车队ID：渝A.JL485");
+	    
+	    // 车辆状态相关布局与信息
+	    motorcade_status_layout = (RelativeLayout) findViewById(R.id.motorcade_status_layout);
+	    motorcade_id = (TextView) findViewById(R.id.motorcade_id);
+	    motorcade_numbers = (TextView) findViewById(R.id.motorcade_numbers);
+	    motorcade_ordinal = (TextView) findViewById(R.id.vehicle_ordinal);
+	    pre_vehid = (TextView) findViewById(R.id.vehicle_preid);
+	    vehicle_speed = (TextView) findViewById(R.id.vehicle_speed);
+	    vehicle_advisoryspeed = (TextView) findViewById(R.id.vehicle_advisoryspeed);
+	    vehicle_curdistance = (TextView) findViewById(R.id.vehicle_curdistance);
+	    vehicle_advdistance = (TextView) findViewById(R.id.vehicle_advdistance);
+	    veh_dismiss_btn = (Button) findViewById(R.id.veh_dismiss_btn);
+	    veh_dismiss_btn.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				if (TCPService.Flag_Connection_MK5) {
+					if ("解散".equals(veh_dismiss_btn.getText().toString())) {
+						try {
+							Log.i("liuhongdong", "头车发送解散");
+							json_vehdismiss_formation.put("msgtype", "disbandformation");
+
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+		        		Util.send_To_MK5("FORMATION", json_vehdismiss_formation);
+					} else if("离队".equals(veh_dismiss_btn.getText().toString())){
+						try {
+							Log.i("liuhongdong", "从车发送离队");
+							json_vehdismiss_formation.put("msgtype", "leaveformation");
+
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+		        		Util.send_To_MK5("FORMATION", json_vehdismiss_formation);
+					}
+	        	} else {
+					Toast.makeText(OverlayDemo.this, "与MK5未连接，发送失败", Toast.LENGTH_SHORT).show();
+	        	}
+                
+			}
+		});
+	    
+	    
+ 	    motorcade_status_layout.setVisibility(View.GONE);
+ 	    
+ 	    // 车队列表
+ 	    motorcade_list_layout = (RelativeLayout) findViewById(R.id.motorcade_list_layout);
+ 	    motorcadelist_listview  = (ListView) findViewById(R.id.motorcadelistview);
+ 	    motorcadelist_listview.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				// TODO Auto-generated method stub
+				Client.motorcade_list_flag = false;
+				motorcade_list_layout.setVisibility(View.GONE);
+				motorcadeinfo_layout.setVisibility(View.VISIBLE);
+				formation formationitem = motorcade_arraylist.get(position);
+		 	    motorcadeinfo_id.setText(formationitem.getFormationid());
+		 	    motorcadeinfo_name.setText(formationitem.getFormationname()); 
+		 	    motorcadeinfo_numbers.setText(String.valueOf(formationitem.getFormationnum()));
+		 	    if (formationitem.getFormaitontype() == 0) {
+		 	    	motorcadeinfo_type.setText("unknown");
+		 	    } else if (formationitem.getFormaitontype() == 1) {
+		 	    	motorcadeinfo_type.setText("car");
+		 	    } else if (formationitem.getFormaitontype() == 2) {
+		 	    	motorcadeinfo_type.setText("bus");
+		 	    } else if (formationitem.getFormaitontype() == 3) {
+		 	    	motorcadeinfo_type.setText("special");
+		 	    } else if (formationitem.getFormaitontype() == 4) {
+		 	    	motorcadeinfo_type.setText("axle");
+		 	    }
+		 	    motorcadeinfo_start.setText(formationitem.getFormationstartlocation());
+			    motorcadeinfo_end.setText(formationitem.getFormationdestination());
+			    				
+			}
+			
+		});
+ 	    Button motorcadelist_back_btn = (Button) findViewById(R.id.motorcadelist_back_btn);
+ 	    motorcadelist_back_btn.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				motorcade_list_layout.setVisibility(View.GONE);
+			}
+		});
+ 	    motorcade_list_layout.setVisibility(View.GONE);
+ 	    
+ 	    // 车队详细信息
+ 	    motorcadeinfo_layout = (RelativeLayout) findViewById(R.id.motorcadeinfo_layout);
+ 	    motorcadeinfo_id = (TextView) findViewById(R.id.motorcadeinfo_id);
+ 	    motorcadeinfo_name = (TextView) findViewById(R.id.motorcade_name);
+ 	    motorcadeinfo_numbers = (TextView) findViewById(R.id.motorcade_number);
+ 	    motorcadeinfo_type = (TextView) findViewById(R.id.motorcade_type);
+ 	    motorcadeinfo_start = (TextView) findViewById(R.id.motorcade_start);
+	    motorcadeinfo_end = (TextView) findViewById(R.id.motorcade_end);
+	    Button motorcadeinfo_back_btn = (Button) findViewById(R.id.motorcadeinfo_back_btn);
+	    motorcadeinfo_back_btn.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				motorcadeinfo_layout.setVisibility(View.GONE);
+			}
+		});
+	    Button join_formation_btn = (Button) findViewById(R.id.join_formation);
+	    join_formation_btn.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				if (TCPService.Flag_Connection_MK5) {
+	        		try {
+						json_JoinFormation.put("msgtype", "joinformation");
+						json_JoinFormation.put("formationid", motorcadeinfo_id.getText().toString());
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+	        		Util.send_To_MK5("FORMATION", json_JoinFormation);
+	        		motorcadeinfo_layout.setVisibility(View.GONE);
+	        		Client.motorcade_list.clear();
+	        		Client.motorcade_list_flag = true;
+	        	} else {
+					Toast.makeText(OverlayDemo.this, "与MK5未连接，发送失败", Toast.LENGTH_SHORT).show();
+					Client.motorcade_list_flag = true;
+	        	}
+			}
+		});
+	    motorcadeinfo_layout.setVisibility(View.GONE);
+	    
+	    // 车辆入队
+	    joinrequestinfo_layout = (RelativeLayout) findViewById(R.id.joinrequestinfo_layout);
+	    joinrequest_vehid = (TextView) findViewById(R.id.joinrequest_vehid);
+	    joinrequest_quadrant = (TextView) findViewById(R.id.joinrequest_quadrant);
+	    joinrequest_distance = (TextView) findViewById(R.id.joinrequest_distance);
+	    joinrequest_agree_btn = (Button) findViewById(R.id.joinrequest_agree);
+	    joinrequest_agree_btn.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				if (TCPService.Flag_Connection_MK5) {
+	        		try {
+						json_JoinRequst_Result.put("msgtype", "joinformationrespons");
+						json_JoinRequst_Result.put("result", true);
+						json_JoinRequst_Result.put("vehid", joinrequest_vehid.getText().toString());
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+	        		Util.send_To_MK5("FORMATION", json_JoinRequst_Result);
+	        		joinrequestinfo_layout.setVisibility(View.GONE);
+	        		Client.requestflag = false;
+	        		joinrequestinfo_layout.postDelayed(new Runnable() {
+						@Override
+						public void run() {
+							// TODO Auto-generated method stub
+							Client.requestflag = true;
+						}
+					}, 3000);
+	        	} else {
+					Toast.makeText(OverlayDemo.this, "与MK5未连接，发送失败", Toast.LENGTH_SHORT).show();
+					joinrequestinfo_layout.setVisibility(View.GONE);
+					Client.requestflag = false;
+	        	}
+			}
+		});
+	    joinrequest_reject_btn = (Button) findViewById(R.id.joinrequest_reject);
+	    joinrequest_reject_btn.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				if (TCPService.Flag_Connection_MK5) {
+	        		try {
+						json_JoinRequst_Result.put("msgtype", "joinresponse");
+						json_JoinRequst_Result.put("result", false);
+						json_JoinRequst_Result.put("vehid", joinrequest_vehid.getText().toString());
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+	        		Util.send_To_MK5("FORMATION", json_JoinRequst_Result);
+	        		joinrequestinfo_layout.setVisibility(View.GONE);
+	        		Client.requestflag = false;
+	        	} else {
+					Toast.makeText(OverlayDemo.this, "与MK5未连接，发送失败", Toast.LENGTH_SHORT).show();
+					joinrequestinfo_layout.setVisibility(View.GONE);
+					Client.requestflag = false;
+	        	}
+			}
+		});
+	    joinrequestinfo_layout.setVisibility(View.GONE);
+	    
+	    //请求入队车辆收到头车是否同意的回复
+	    joinresponseinfo_layout = (RelativeLayout) findViewById(R.id.joinresponseinfo_layout);
+	    joinresponse_id = (TextView) findViewById(R.id.joinresponse_id);
+	    joinresponse_result = (TextView) findViewById(R.id.joinresponse_result);
+	    joinresponse_preid = (TextView) findViewById(R.id.joinresponse_preid);
+	    joinresponse_behid = (TextView) findViewById(R.id.joinresponse_behid);
+	    joinresponse_chghd = (TextView) findViewById(R.id.joinresponse_chghd);
+	    joinresponseinfo_layout.setVisibility(View.GONE);
+	    
+	    // 入队请求同意后，车队中其他车辆的调整
+	    entranceprompt_otheradjust = (RelativeLayout) findViewById(R.id.entranceprompt_otheradjust);
+	    otheradj_advspeed = (TextView) findViewById(R.id.advspeed);
+	    otheradj_advdistance = (TextView) findViewById(R.id.advdistance);
+	    otheradj_curdistance = (TextView) findViewById(R.id.curdistance);
+	    otheradj_joincarnum = (TextView) findViewById(R.id.joincarnum);
+	    entranceprompt_otheradjust.setVisibility(View.GONE);
+	     	    
+	    //入队请求同意后，入队车辆的入队提示
+	    entranceprompt_layout = (RelativeLayout) findViewById(R.id.entranceprompt_layout);
+	    entranceprompt_text = (TextView) findViewById(R.id.entranceprompt_text);
+	    entranceprompt_layout.setVisibility(View.GONE);
+	    
+	    //入队请求同意后，入队车辆的入队完成提示
+	    entrancefinish_layout = (RelativeLayout) findViewById(R.id.entrancefinish_layout);
+	    finish_vehid = (TextView) findViewById(R.id.finish_vehid);
+	    entrancefinish_layout.setVisibility(View.GONE);
+	    
+	    //头车解散车队
+	    dismissformation_layout = (RelativeLayout) findViewById(R.id.dismissformation_layout);
+	    dismissInfo = (TextView) findViewById(R.id.dismiss_info);
+	    dismissformation_layout.setVisibility(View.GONE);
+	    
+	    //离队提醒
+	    leaveformation_layout = (RelativeLayout) findViewById(R.id.leaveformation_layout);
+	    leaveformation_layout.setVisibility(View.GONE);
+	    
+	    //车队中有车辆离队成功后，通知其他车辆有车离队
+	    otherleaveformation_layout = (RelativeLayout) findViewById(R.id.otherleaveformation_layout);
+	    leaveVehid = (TextView) findViewById(R.id.leave_vehid);
+	    otherleaveformation_layout.setVisibility(View.GONE);
 	}
 
 	/**
@@ -1302,7 +1971,7 @@ public class OverlayDemo extends Activity
 		@Override
 		public void onCompleted(SpeechError error) {
 			if (error == null) {
-				Sound_Switch = true; //播放完成后，打开开关。 //需要在图片消失之后，打开，否则语音播报循环播报。
+				Sound_Switch = true; //播放完成后，打开开关。
 				showTip("播放完成");
 			} else if (error != null) {
 				showTip(error.getPlainDescription(true));
@@ -1551,6 +2220,84 @@ public class OverlayDemo extends Activity
 		intentFilter8.addAction("com.Li.ServiceClient.GroupExistRegister");
 		registerReceiver(groupExistRegister, intentFilter8);
 		
+		//mk5删除车辆的广播
+		deleteIdReceiver = new DeleteIdReceiver();
+		IntentFilter intentFilter9 = new IntentFilter();
+		intentFilter9.addAction("com.liu.client.deleteid");
+		registerReceiver(deleteIdReceiver, intentFilter9);
+		
+		
+		//mk5编队车队列表
+	    motorcadeListReceiver = new MotorcadeListReceiver();
+		IntentFilter intentFilter10 = new IntentFilter();
+		intentFilter10.addAction("com.liu.Client.sendMotorcadeList");
+		registerReceiver(motorcadeListReceiver, intentFilter10);
+		
+		//编队  其他车的加队请求
+		joinRequestReceiver = new JoinRequestReceiver();
+		IntentFilter intentFilter11 = new IntentFilter();
+		intentFilter11.addAction("com.liu.Client.sendJoinRequest");
+		registerReceiver(joinRequestReceiver, intentFilter11);
+		
+		//入队请求后 头车对入队请求车辆的回复
+		joinResponseReceiver = new JoinResponseReceiver();
+		IntentFilter intentFilter12 = new IntentFilter();
+		intentFilter12.addAction("com.liu.Client.sendJoinResponse");
+		registerReceiver(joinResponseReceiver, intentFilter12);
+		
+		//入队请求后  入队请求车辆进行入队的消息广播
+		changeHeadingReceiver = new ChangeHeadingReceiver();
+		IntentFilter intentFilter13 = new IntentFilter();
+		intentFilter13.addAction("com.liu.Client.sendChangeHeading");
+		registerReceiver(changeHeadingReceiver, intentFilter13);
+		
+		//入队请求同意后，车队中其他车辆的调整
+		otherAdjustReceiver = new OtherAdjustReceiver();
+		IntentFilter intentFilter14 = new IntentFilter();
+		intentFilter14.addAction("com.liu.Client.sendOtherAdjust");
+		registerReceiver(otherAdjustReceiver, intentFilter14);
+		
+		//入队请求同意后 入队请求车辆完成入队的消息广播
+		joinFinishReceiver = new JoinFinishReceiver();
+		IntentFilter intentFilter15 = new IntentFilter();
+		intentFilter15.addAction("com.liu.Client.sendJoinFinish");
+		registerReceiver(joinFinishReceiver, intentFilter15);
+		
+		//头车解散车队消息广播
+		dismissFormationReceiver = new DismissFormationReceiver();
+		IntentFilter intentFilter16 = new IntentFilter();
+		intentFilter16.addAction("com.liu.Client.sendDismissFormation");
+		registerReceiver(dismissFormationReceiver, intentFilter16);
+		
+		//头车解散车队成功后，通知车队其他车辆车队已经解散了的消息广播
+		dismissedFormationReceiver = new DismissedFormationReceiver();
+		IntentFilter intentFilter17 = new IntentFilter();
+		intentFilter17.addAction("com.liu.Client.sendDismissedFormation");
+		registerReceiver(dismissedFormationReceiver, intentFilter17);
+		
+		//头车允许请求离队的车离队
+		leaveFormationReceiver = new LeaveFormationReceiver();
+		IntentFilter intentFilter18 = new IntentFilter();
+		intentFilter18.addAction("com.liu.Client.sendLeaveFormation");
+		registerReceiver(leaveFormationReceiver, intentFilter18);
+		
+		//把车队内有车离队的消息发送给车队内其他车辆
+		otherLeaveFormationReceiver = new OtherLeaveFormationReceiver();
+		IntentFilter intentFilter19 = new IntentFilter();
+		intentFilter19.addAction("com.liu.Client.sendOtherLeaveFormation");
+		registerReceiver(otherLeaveFormationReceiver, intentFilter19);
+		
+		//发送给车队内其他车 车队内要离队的车 离队成功
+		otherLeaveSuccessReceiver = new OtherLeaveSuccessReceiver();
+		IntentFilter intentFilter20 = new IntentFilter();
+		intentFilter20.addAction("com.liu.Client.sendOtherLeaveSuccess");
+		registerReceiver(otherLeaveSuccessReceiver, intentFilter20);
+		
+		//发送给离队车辆本身 离队车辆离队是否成功
+		leaveMsgReceiver = new LeaveMsgReceiver();
+		IntentFilter intentFilter21 = new IntentFilter();
+		intentFilter21.addAction("com.liu.Client.sendLeaveMsg");
+		registerReceiver(leaveMsgReceiver, intentFilter21);
 	}
 
 	// 车群组创建按钮监听点击方法
@@ -1560,7 +2307,7 @@ public class OverlayDemo extends Activity
 		if (Util.isNetworkAvailable(OverlayDemo.this) && MyApplication.isServerConnect) {
 
 			// 这里将群组创建中的 信息发送到 后台
-			try {//
+			try {
 				mJson_team_creation.put("datatype", "TEAM_REGISTER");
 				mJson_team_creation.put("fromid", MyApplication.user_name);
 				mJson_team_creation.put("fromtype", "veh");
@@ -1613,7 +2360,7 @@ public class OverlayDemo extends Activity
 		
 		//自定义 进入车队的图标
 		mCurrentMarker = BitmapDescriptorFactory
-				.fromResource(R.drawable.maker);
+				.fromResource(R.drawable.icon_marker_1);
 		mBaiduMap
 				.setMyLocationConfigeration(new MyLocationConfiguration(
 						mCurrentMode, true, mCurrentMarker));
@@ -1767,11 +2514,11 @@ public class OverlayDemo extends Activity
 				btn_groupMember_name.setClickable(true);
 				
 				//自定义 进入车队的图标
-				mCurrentMarker = BitmapDescriptorFactory
-						.fromResource(R.drawable.maker);//R.drawable.icon_geo
-				mBaiduMap
-						.setMyLocationConfigeration(new MyLocationConfiguration(
-								mCurrentMode, true, mCurrentMarker));
+//				mCurrentMarker = BitmapDescriptorFactory
+//						.fromResource(R.drawable.icon_marker_1);//R.drawable.icon_geo
+//				mBaiduMap
+//						.setMyLocationConfigeration(new MyLocationConfiguration(
+//								mCurrentMode, true, mCurrentMarker));
 			}
 
 			break;
@@ -1839,7 +2586,73 @@ public class OverlayDemo extends Activity
 		case R.id.group_announcement_back_btn:
 			mcar_group_announcement.setVisibility(View.GONE);
 			break;
+		
+		//弹出车辆创建编队页面按钮		
+		case R.id.btn_Formation:
+			create_formation_layout.setVisibility(View.VISIBLE);
+			break;
+		//车辆创建编队按钮
+		case R.id.formation_creat_btn:
+			if (TCPService.Flag_Connection_MK5) {
+				try {
+					json_CreateFormation.put("msgtype", "creatformation");
+					json_CreateFormation.put("formationname", formationName.getText().toString());
+					json_CreateFormation.put("formationstart", formationStart.getText().toString());
+					json_CreateFormation.put("formationend", formationEnd.getText().toString());
+					
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				Util.send_To_MK5("FORMATION", json_CreateFormation);
+				
+				create_formation_layout.setVisibility(View.GONE);
+			} else {
+				Toast.makeText(this, "与MK5未连接，发送失败", Toast.LENGTH_SHORT).show();
+			}
+			break;
+		//车辆创建编队页面撤销按钮	
+		case R.id.formation_back_btn:
+			create_formation_layout.setVisibility(View.GONE);
+			break;
+			
+			
+		//查询编队	
+        case R.id.btn_QueryFormation:
+			if (TCPService.Flag_Connection_MK5) {
+				try {
+					json_QueryFormation.put("msgtype", "queryformation");
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				Util.send_To_MK5("FORMATION", json_QueryFormation);
+				Log.i("liuhongdong", "查询编队信息发送成功！");
+			} else {
+				Toast.makeText(this, "与MK5未连接，发送失败", Toast.LENGTH_SHORT).show();
+			}
+			break;
+			
+		// 加入车队
+//        case R.id.join_formation:
+//        	if (TCPService.Flag_Connection_MK5) {
+//        		try {
+//					json_JoinFormation.put("msgtype", "joinformation");
+//					json_JoinFormation.put("formationid", Client.motorcade_list.get(0).getFormationid());
+//				} catch (JSONException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//        		Util.send_To_MK5("FORMATION", json_JoinFormation);
+//        		motorcade_list_layout.setVisibility(View.GONE);
+//        		Client.motorcade_list.clear();
+//        	} else {
+//				Toast.makeText(this, "与MK5未连接，发送失败", Toast.LENGTH_SHORT).show();
+//			}
+//        	
+//			break;
 		}
+		
 
 	}
 
@@ -1965,13 +2778,12 @@ public class OverlayDemo extends Activity
 			
 			//自定义 进入车队的图标
 			mCurrentMarker = BitmapDescriptorFactory
-					.fromResource(R.drawable.maker);//R.drawable.icon_geo
+					.fromResource(R.drawable.icon_marker_1);//R.drawable.icon_geo
 			
 			mBaiduMap
 					.setMyLocationConfigeration(new MyLocationConfiguration(
 							mCurrentMode, true, mCurrentMarker));
 
-			
 		}
 	}
 
@@ -2086,11 +2898,11 @@ public class OverlayDemo extends Activity
 				
 				
 				//自定义 进入车队的图标
-//				mCurrentMarker = BitmapDescriptorFactory
-//						.fromResource(R.drawable.maker);//R.drawable.icon_geo
-//				mBaiduMap
-//						.setMyLocationConfigeration(new MyLocationConfiguration(
-//								mCurrentMode, true, mCurrentMarker));
+				mCurrentMarker = BitmapDescriptorFactory
+						.fromResource(R.drawable.icon_marker_1);//R.drawable.icon_geo
+				mBaiduMap
+						.setMyLocationConfigeration(new MyLocationConfiguration(
+								mCurrentMode, true, mCurrentMarker));
 			} else {
 				ToastUtil.makeText(OverlayDemo.this, AskReturnContent);
 			}
@@ -2132,77 +2944,619 @@ public class OverlayDemo extends Activity
 		}
 	}
 	
+	//接收mk5发送要删除的车辆广播
+	public class DeleteIdReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			int deleteId = intent.getIntExtra("deleteId", 0);
+			Log.i(TAG, "deleteID will--------- delete success----------------");
+			if (deleteId != 0) {
+				addMarkerFromMk5.get(deleteId).remove();
+				addMarkerFromMk5.remove(deleteId);
+				Log.i(TAG, "deleteID always delete success----------------");
+			}
+		}
+	}
+	
+	
+	
+	//mk5编队车队列表信息
+	public class MotorcadeListReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			HashMap<Integer, String> motorcade_list = (HashMap<Integer, String>) intent.getSerializableExtra("list");
+			
+			int motorcadenum = 0;
+			for (Integer i : motorcade_list.keySet()) {
+				motorcadenum = i;
+			}
+			
+			try {
+				JSONArray jsonArray = new JSONArray(motorcade_list.get(motorcadenum));
+				for (int i = 0; i < motorcadenum; i ++) {
+					JSONObject formationJson = jsonArray.getJSONObject(i);
+					formation formationmsg = new formation();
+					formationmsg.setFormationid(formationJson.getString("formationid"));
+					formationmsg.setFormationname(formationJson.getString("formationname"));
+					formationmsg.setFormationnum(formationJson.getInt("formationnum"));
+					formationmsg.setFormaitontype(formationJson.getInt("formationtype"));
+					formationmsg.setFormationdestination(formationJson.getString("formationdestination"));
+					formationmsg.setFormationstartlocation(formationJson.getString("formationstartlocation"));
+					formationmsg.setVehleaderlat(formationJson.getDouble("vehleaderlat"));
+					formationmsg.setVehleaderlon(formationJson.getDouble("vehleaderlon"));
+					formationmsg.setVehleaderspeed(formationJson.getDouble("vehleaderspeed"));
+					motorcade_arraylist.put(i, formationmsg);
+				}
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			List<Map<String, String>> list_motorcade_data = new ArrayList<Map<String,String>>();
+			for (int i = 0; i < motorcade_arraylist.size(); i++) {
+				Map<String, String> motorcadeitem = new HashMap<String, String>();
+				motorcadeitem.put("motorcadename", motorcade_arraylist.get(i).getFormationname());
+				list_motorcade_data.add(motorcadeitem);
+			}
+			
+			SimpleAdapter motorcadelistAdapter = new SimpleAdapter(OverlayDemo.this, list_motorcade_data,
+					R.layout.motorcadelist_item, new String[] {"motorcadename"}, new int[] {R.id.motorcade_mame});
+			motorcadelist_listview.setAdapter(motorcadelistAdapter);
+			motorcade_list_layout.setVisibility(View.VISIBLE);
+		}
+	}
+	
+	// 编队  其他车的加队请求接收广播
+	public class JoinRequestReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			request requestinfo = (request) intent.getSerializableExtra("joinrequest");
+			String vehid = requestinfo.getVehid();
+			int quadrant = requestinfo.getQuadrant();
+			Double distance = requestinfo.getDistance();
+			String quadrantStr = null;
+			if (quadrant == 1) {
+				quadrantStr = "右前方";
+			} else if (quadrant == 2) {
+				quadrantStr = "左前方";
+			} else if (quadrant == 3) {
+				quadrantStr = "左后方";
+			} else if (quadrant == 4) {
+				quadrantStr = "右后方";
+			}
+			joinrequest_vehid.setText(vehid);
+			joinrequest_quadrant.setText(quadrantStr);
+			joinrequest_distance.setText(String.valueOf(df.format(distance))+"米");
+		    joinrequestinfo_layout.setVisibility(View.VISIBLE);
+		}
+	}
+	
+
+	
+	// 入队请求后 头车对入队请求车辆的回复
+	public class JoinResponseReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			Log.i(TAG, "队请求后 头车对入队请求车辆的回复");
+			joinresponse joinrs = (joinresponse) intent.getSerializableExtra("joinresponse");
+			Boolean status = joinrs.getStatus();
+			String join_formationid = joinrs.getFormationid();
+			String join_preid = joinrs.getPrevehid();
+			String join_behid = joinrs.getBehvehid();
+			Boolean join_chghd = joinrs.getChangeheading();
+			String statusStr = null, chghdStr = null;
+			if (status) {
+				statusStr = "同意";
+			} else {
+				statusStr = "拒绝";
+			}
+			if (join_chghd) {
+				chghdStr = "是";
+			} else {
+				chghdStr = "否";
+			}
+			joinresponse_id.setText(join_formationid);
+			joinresponse_result.setText(statusStr);
+			joinresponse_preid.setText(join_preid);
+			joinresponse_behid.setText(join_behid);
+			joinresponse_chghd.setText(chghdStr);
+			joinresponseinfo_layout.setVisibility(View.VISIBLE);
+			
+//			if (status) {
+//				joinresponseinfo_layout.postDelayed(new Runnable() {
+//					
+//					@Override
+//					public void run() {
+//						// TODO Auto-generated method stub
+//						joinresponseinfo_layout.setVisibility(View.INVISIBLE);
+//					
+//					}
+//				}, 3000);
+//			} else {
+//				joinresponseinfo_layout.postDelayed(new Runnable() {
+//					
+//					@Override
+//					public void run() {
+//						// TODO Auto-generated method stub
+//						joinresponseinfo_layout.setVisibility(View.INVISIBLE);
+//					}
+//				}, 3000);				
+//			}
+		    
+		}
+		
+	}
+	
+	// 入队请求后  入队请求车辆进行入队的消息广播
+	public class ChangeHeadingReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+//			if ("INVISIBLE".equals(joinresponseinfo_layout.getVisibility())) {
+//				Boolean changeHead = intent.getBooleanExtra("ChangeHead", false);
+//				String changeHeadStr = null;
+//				if (changeHead) {
+//					changeHeadStr = "调头入队";
+//				} else {
+//					changeHeadStr = "正在入队";
+//				}
+//				entranceprompt_text.setText(changeHeadStr);
+//				entranceprompt_layout.setVisibility(View.VISIBLE);
+//				
+//			}
+			
+			
+			selfadjust sa = (selfadjust) intent.getSerializableExtra("selfadjust");
+			Boolean chghd = sa.getChangehead();
+			final String prevehid = sa.getPrevehid();
+			String chghdStr = null;
+			if (chghd) {
+				chghdStr = "是";
+			} else {
+				chghdStr = "否";
+			}
+			joinresponse_chghd.setText(chghdStr);
+			entryFlag = true;
+			new Thread() {
+				public void run() {
+					while (entryFlag) {
+						if (formationMarker.containsKey(prevehid)) {
+							formationMarker.get(prevehid).setVisible(false);
+						}
+						
+						try {
+							sleep(500);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+						if (formationMarker.containsKey(prevehid)) {
+							formationMarker.get(prevehid).setVisible(true);
+						}
+						
+						try {
+							sleep(500);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				};
+			}.start();
+
+		}
+		
+	}
+	
+	//入队请求同意后，车队中其他车辆的调整
+	public class OtherAdjustReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			joinadjust otheradjust = (joinadjust) intent.getSerializableExtra("joinadjust");
+			int positiontype = otheradjust.getPositiontype();
+			if (positiontype == 1) {
+				MyLocationData mMyLocationData = mBaiduMap.getLocationData();
+				double latitude = mMyLocationData.latitude;
+				double longitude = mMyLocationData.longitude;
+				LatLng ll = new LatLng(latitude, longitude);
+				
+				Button button = new Button(getApplicationContext());
+				button.setBackgroundResource(R.drawable.entry);
+				
+                InfoWindow mInfoWindow = new InfoWindow(BitmapDescriptorFactory.fromView(button), ll, -70, new OnInfoWindowClickListener() {
+					
+					@Override
+					public void onInfoWindowClick() {
+						// TODO Auto-generated method stub
+						
+					}
+				});
+                mBaiduMap.showInfoWindow(mInfoWindow);
+                 	
+			} else {
+				Double advspeed = otheradjust.getAdvspeed();
+				Double advdistance = otheradjust.getAdvdistance();
+				Double curdistance = otheradjust.getCurdistance();
+				int joincarnum = otheradjust.getJoincarnum();
+				otheradj_advspeed.setText(String.valueOf(df.format(advspeed)));
+				otheradj_advdistance.setText(String.valueOf(df.format(advdistance)));
+				otheradj_curdistance.setText(String.valueOf(df.format(curdistance)));
+				otheradj_joincarnum.setText(String.valueOf(joincarnum));
+				entranceprompt_otheradjust.setVisibility(View.VISIBLE);
+			}
+			
+		}
+		
+	}
+	
+	//入队请求同意后 入队请求车辆完成入队的消息广播
+	public class JoinFinishReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			String vehid = intent.getStringExtra("finishVehid");
+			
+			joinresponseinfo_layout.setVisibility(View.GONE);
+			
+			entranceprompt_layout.setVisibility(View.GONE);
+			entranceprompt_otheradjust.setVisibility(View.GONE);
+			mBaiduMap.hideInfoWindow();
+			
+			if (vehid.equals(MyApplication.localvehid)) {
+				finish_vehid.setText("入队完成");
+			} else {
+				finish_vehid.setText(vehid+"车,"+"入队完成");
+			}
+			
+			entrancefinish_layout.setVisibility(View.VISIBLE);
+			
+			entrancefinish_layout.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					entrancefinish_layout.setVisibility(View.GONE);
+					if (TextUtils.isEmpty(veh_dismiss_btn.getText().toString())) {
+						veh_dismiss_btn.setText("离队");
+					}
+					motorcade_status_layout.setVisibility(View.VISIBLE);
+				}
+			}, 2000);
+			
+			entryFlag = false;
+			
+		}
+		
+	}
+	
+	//头车解散车队
+	public class DismissFormationReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			motorcade_status_layout.setVisibility(View.GONE);
+			dismissInfo.setText("车队解散成功");
+			dismissformation_layout.setVisibility(View.VISIBLE);
+			dismissformation_layout.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					dismissformation_layout.setVisibility(View.GONE);
+					dismissInfo = null;
+					mBaiduMap.clear();
+					FormationSelfLatLng = null;
+					formationMarker.clear();
+				}
+			}, 3000);
+		}
+		
+	}
+	
+	// 头车解散车队成功后，通知车队其他车辆车队已经解散了
+	private class DismissedFormationReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			String dismissId = intent.getStringExtra("dismissedId");
+			dismissInfo.setText(dismissId+"车队被解散");
+			dismissformation_layout.setVisibility(View.VISIBLE);
+			dismissformation_layout.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					dismissformation_layout.setVisibility(View.GONE);
+					motorcade_status_layout.setVisibility(View.GONE);
+					dismissInfo = null;
+					mBaiduMap.clear();
+					FormationSelfLatLng = null;
+					formationMarker.clear();
+				}
+			}, 3000);
+		}
+		
+	}
+	
+	//头车允许请求离队的车离队
+	private class LeaveFormationReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			leaveformation_layout.setVisibility(View.VISIBLE);
+			leaveformation_layout.postDelayed(new Runnable() {
+				
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					leaveformation_layout.setVisibility(View.GONE);
+					motorcade_status_layout.setVisibility(View.GONE);
+					mBaiduMap.clear();
+					
+					FormationSelfLatLng = null;
+				}
+			}, 3000);
+		}
+		
+	}
+	
+	// 把车队内有车离队的消息发送给车队内其他车辆
+	private class OtherLeaveFormationReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			
+			leave leavemsg = (leave) intent.getSerializableExtra("leave");
+			final String leaveId = leavemsg.getLeaveId();
+			int leavePosition = leavemsg.getPosition();
+			
+			if (leavePosition == 1) {
+//				final String otherid = leaveId;
+				leaveFlag = true;
+				
+				MyLocationData mMyLocationData = mBaiduMap.getLocationData();
+				double latitude = mMyLocationData.latitude;
+				double longitude = mMyLocationData.longitude;
+				LatLng ll = new LatLng(latitude, longitude);
+				
+				Button button = new Button(getApplicationContext());
+				button.setBackgroundResource(R.drawable.leave);
+				
+                InfoWindow mInfoWindow = new InfoWindow(BitmapDescriptorFactory.fromView(button), ll, -70, new OnInfoWindowClickListener() {
+					
+					@Override
+					public void onInfoWindowClick() {
+						// TODO Auto-generated method stub
+						
+					}
+				});
+                mBaiduMap.showInfoWindow(mInfoWindow);
+                
+				new Thread() {
+					public void run() {
+						while (leaveFlag) {
+							if (formationMarker.containsKey(leaveId)) {
+								formationMarker.get(leaveId).setVisible(false);
+							}
+							
+							try {
+								sleep(500);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							
+							if (formationMarker.containsKey(leaveId)) {
+								formationMarker.get(leaveId).setVisible(true);
+							}
+							
+							try {
+								sleep(500);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					};
+				}.start();
+			} else {
+				leaveVehid.setText(leaveId+"车辆即将离队");
+				otherleaveformation_layout.setVisibility(View.VISIBLE);
+				otherleaveformation_layout.postDelayed(new Runnable() {
+					
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						otherleaveformation_layout.setVisibility(View.GONE);
+					}
+				}, 3000);
+			}
+		}
+		
+	}
+	
+	//车队内要离队的车 离队成功
+	private class OtherLeaveSuccessReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			leave leavemsg = (leave) intent.getSerializableExtra("leave");
+			String leaveId = leavemsg.getLeaveId();
+			int leavePosition = leavemsg.getPosition();
+			
+			if (leavePosition == 1) {
+				leaveFlag = false;
+				mBaiduMap.hideInfoWindow();
+			}
+		}
+		
+	}
+	
+	//要离队的本车是否离队成功
+	private class LeaveMsgReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			Boolean leave = intent.getBooleanExtra("leave", false);
+			if (leave) {
+				leaveVehid.setText("车辆离队成功！");
+				otherleaveformation_layout.setVisibility(View.VISIBLE);
+				otherleaveformation_layout.postDelayed(new Runnable() {
+					
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						otherleaveformation_layout.setVisibility(View.GONE);
+						
+						motorcade_status_layout.setVisibility(View.GONE);
+						
+						mBaiduMap.clear();
+						
+//						formationMarker.clear();
+						
+					}
+				}, 3000);
+			} else {
+				leaveVehid.setText("请尽快驶离车队！");
+				otherleaveformation_layout.setVisibility(View.VISIBLE);
+				otherleaveformation_layout.postDelayed(new Runnable() {
+					
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						otherleaveformation_layout.setVisibility(View.GONE);
+					}
+				}, 3000);
+			}
+		}
+		
+	}
+	
+	
 	/**
 	 * 添加 车队成员车辆的 覆盖物
+	 * @throws JSONException 
 	 */
-	public void addInfosOverlayHashMap(final HashMap<Integer, Car_Data> other_Car_map) {
-		mBaiduMap.clear();
-		new Thread() {// 一进来就开启新进程，因为网络读取图片不能再主线程中操作
+	public void addInfosOverlayHashMap(final HashMap<String, String> other_Car_map) {
+		  for (String teamId : other_Car_map.keySet()) {
+			  
+			  try {
+				  JSONArray jsonArray = new JSONArray(other_Car_map.get(teamId));
+				  for (int i =0; i < jsonArray.length(); i++) {
+					  JSONObject cargroupJson = jsonArray.getJSONObject(i);
+					  if (!cargroupJson.getString("veh_id").equals(MyApplication.user_name)) {
+							
+							Log.d(TAG, "car group member location is sava " + cargroupJson.getString("veh_id"));
+							vin = cargroupJson.getString("VIN");
+							intVin = Integer.valueOf(vin);
+							if (!cargroup_member_Location.containsKey(intVin) && (cargroup_member_LocationWithUsername.containsKey(cargroupJson.getString("veh_id")))){
+								int hashMapWithVin = cargroup_member_LocationWithUsername.get(cargroupJson.getString("veh_id")).vin;
+								cargroup_member_Location.remove(hashMapWithVin);
+								cargroup_member_LocationWithUsername.remove(cargroupJson.getString("veh_id"));
+								cargroup_member_LocationRemove.add(hashMapWithVin);
+								
+								Car_Data mCar_Data = new Car_Data();
+								mCar_Data.lat_cloud = Double.valueOf(cargroupJson.getString("veh_lat"));
+								mCar_Data.longi_cloud = Double.valueOf(cargroupJson.getString("veh_lon"));
+								mCar_Data.user_name = cargroupJson.getString("veh_id");
+								mCar_Data.vin = intVin;
+								cargroup_member_Location.put(intVin, mCar_Data);
+								cargroup_member_LocationWithUsername.put(mCar_Data.user_name, mCar_Data);
+								
+							} else {
+								Car_Data mCar_Data = new Car_Data();
+								mCar_Data.lat_cloud = Double.valueOf(cargroupJson.getString("veh_lat"));
+								mCar_Data.longi_cloud = Double.valueOf(cargroupJson.getString("veh_lon"));
+								mCar_Data.user_name = cargroupJson.getString("veh_id");
+								mCar_Data.vin = intVin;
+								cargroup_member_Location.put(intVin, mCar_Data);
+								cargroup_member_LocationWithUsername.put(mCar_Data.user_name, mCar_Data);
+							}   
+						
+						
+						for (int vin : cargroup_member_Location.keySet()) {
+							Log.d(TAG, "cargroup member location is  " +  cargroup_member_Location.get(vin).lat_cloud   +   cargroup_member_Location.get(vin).longi_cloud);
+						}
+					 }
+				  }
+
+			  } catch (JSONException e1) {
+				  // TODO Auto-generated catch block
+			      e1.printStackTrace();
+		      }
+			  
+		  }
+		  
+			
+			if (!cargroup_member_LocationRemove.isEmpty()) {
+				for (Integer key : cargroup_member_LocationRemove) {
+					if (carGroupMarkerFromCloud.containsKey(key)) {
+						carGroupMarkerFromCloud.get(key).remove();
+						carGroupMarkerFromCloud.remove(key);
+					}
+				}
+			}
+			
+			new Thread() {// 一进来就开启新进程，因为网络读取图片不能再主线程中操作
 			private BitmapDescriptor mIconMaker;
 			private InfoWindow mInfoWindow;
-
+			View view = LayoutInflater.from(OverlayDemo.this).inflate(R.layout.marker_layout, null);
+			TextView tv_num_price=(TextView) view.findViewById(R.id.tv_num_price);
+		
 			public void run() {
-				mBaiduMap.clear();
 				OverlayOptions overlayOptions = null;
 				Marker marker = null;
-
-				for (Integer key : other_Car_map.keySet()) {
-					Car_Data mCar_Data = other_Car_map.get(key);
+		
+				for (Integer key : cargroup_member_Location.keySet()) {
+					Car_Data mCar_Data = cargroup_member_Location.get(key);
 					double longi = mCar_Data.longi_cloud;
 					double lat = mCar_Data.lat_cloud;
 					String user_name = mCar_Data.user_name;
 					// 转换成百度地图需要的经纬度
 					LatLng sourceLatLng = new LatLng((double) lat, (double) longi);// 纬度，经度
-
-					View view = LayoutInflater.from(OverlayDemo.this).inflate(R.layout.marker_layout, null);
-					TextView tv_num_price=(TextView) view.findViewById(R.id.tv_num_price);
-					tv_num_price.setText(user_name);
-					BitmapDescriptor free_view = BitmapDescriptorFactory.fromView(view);
 					
-//					mIconMaker = BitmapDescriptorFactory.fromResource(R.drawable.maker);// 把图片转化为BitmapDescriptor格式
-
-					overlayOptions = new MarkerOptions().position(sourceLatLng).icon(free_view).zIndex(10);// zIndex没什么用
-					marker = (Marker) (mBaiduMap.addOverlay(overlayOptions));
-					// 额外的信息需要用Bundle存储该marker点的Info数据源
-					// 存入的信息放入键值对中，每次都NEW一个Bundle对象
-					// 取出时只需要用marker.getExtraInfo().get("info");
-					Bundle bundle = new Bundle();// bundel类似于session
-					bundle.putSerializable("Car_info", mCar_Data);
-					marker.setExtraInfo(bundle);// 把INFO信息存入marker点中
-					
-					// 给车队成员车辆添加信息显示
-//					marker.setTitle(user_name);
-//					marker.setTitle("user_name");
-					Log.i(TAG, "user_name是-----------------------"+user_name);
-
-//					Button button = new Button(getApplicationContext());
-//	                button.setBackgroundResource(R.drawable.popup);
-//	                OnInfoWindowClickListener listener = null;
-//					
-//					button.setText(user_name);
-//                    button.setTextColor(Color.BLACK);
-//                    button.setWidth(50);
-
-//                    listener = new OnInfoWindowClickListener() {
-//                        public void onInfoWindowClick() {
-//                            LatLng ll = marker.getPosition();
-//                            LatLng llNew = new LatLng(ll.latitude + 0.005,
-//                                    ll.longitude + 0.005);
-//                            marker.setPosition(llNew);
-//                            mBaiduMap.hideInfoWindow();
-//                        }
-//                    };
-//                    LatLng ll = marker.getPosition();
-//                    mInfoWindow = new InfoWindow(BitmapDescriptorFactory.fromView(button), ll, -47, listener);
-//                    mBaiduMap.showInfoWindow(mInfoWindow);
-					
-					
+					if (!carGroupMarkerFromCloud.containsKey(key)) {
+						
+						tv_num_price.setText(user_name);
+						BitmapDescriptor free_view = BitmapDescriptorFactory.fromView(view);
+						
+						overlayOptions = new MarkerOptions().position(sourceLatLng).icon(free_view).zIndex(10);
+						marker = (Marker) (mBaiduMap.addOverlay(overlayOptions));
+						// 额外的信息需要用Bundle存储该marker点的Info数据源
+						// 存入的信息放入键值对中，每次都NEW一个Bundle对象
+						// 取出时只需要用marker.getExtraInfo().get("info");
+						Bundle bundle = new Bundle();// bundel类似于session
+						bundle.putSerializable("Car_info", mCar_Data);
+						marker.setExtraInfo(bundle);// 把INFO信息存入marker点中
+						
+						carGroupMarkerFromCloud.put(key, marker);
+					} else {
+						carGroupMarkerFromCloud.get(key).setPosition(sourceLatLng);
+					}
 					
 				}
+				
 			}
-
+		
 		}.start();
 	}
+	
+	
+	
+	
 
 	/**
 	 * 清除所有Overlay

@@ -56,13 +56,22 @@ public class ServiceClient extends Thread {
 	public static Map<String, Car_Data> mapGroup = new HashMap<String, Car_Data>();
 	
 	//定义Map集合 存储后台发过来的群组成员位置信息
+    public static HashMap<String, String> cargroup_member = new HashMap<String, String>();
+	
+	//定义Map集合 存储后台发过来判断后的群组成员位置信息
 	public static HashMap<Integer, Car_Data> cargroup_member_Location = new HashMap<Integer, Car_Data>();
-       
+	public static HashMap<String, Car_Data> cargroup_member_LocationWithUsername = new HashMap<String, Car_Data>();
+    // 存储需要移除的车队成员的VIN
+	public static List<Integer> cargroup_member_LocationRemove = new ArrayList<Integer>();
+	
 	//定义Map集合 存储后台发过来的已经存在的车群组 信息
     public static HashMap<Integer, CarGroup> carGroup_Exist = new HashMap<Integer, CarGroup>();
 		
 	String chatContent, from_id;//群组聊天信息, 信息哪个车
 	String announcementContent;//后台推送的车队公告信息
+	
+	String vin;
+	int intVin;
 	
 	public ServiceClient(Socket s, Context c) {
 		this.socketClient = s;
@@ -82,14 +91,15 @@ public class ServiceClient extends Thread {
 			ExecutorService fixedThreadPool = Executors.newFixedThreadPool(5);
 
 			// 线程池中定时开启线程 检测与后台的连接
-			MyApplication.scheduledThreadPool.scheduleAtFixedRate(
-					connectRunnable, 0, 3000, TimeUnit.MILLISECONDS);
+//			MyApplication.scheduledThreadPool.scheduleAtFixedRate(
+//					connectRunnable, 0, 3000, TimeUnit.MILLISECONDS);
 			while (isConnect) {
 				if (isConnectService) {// 首先判断其他界面有没有点击 退出按钮，若点击了
 										// 则这里的标志位会职位false
 					// 读取传过来的数据
 					while ((matches = br.readLine()) != null) {
 						Log.i(TAG, "-----------" + matches);
+						
 						fixedThreadPool.execute(command);
 					}
 				} else {
@@ -120,6 +130,7 @@ public class ServiceClient extends Thread {
 		public void run() {
 			// TODO Auto-generated method stub
 			try {
+				
 				parseJson(matches);
 			} catch (UnsupportedEncodingException e) {
 				// TODO Auto-generated catch block
@@ -184,6 +195,10 @@ public class ServiceClient extends Thread {
 
 		if (strResult != null) {
 
+			if ("LIVE".equals(strResult)) {
+				ServerConnectService.rcvTime = System.currentTimeMillis();
+			}
+			
 			JSONObject connetJSon = new JSONObject(strResult);
 
 			// 注册 解析
@@ -223,7 +238,7 @@ public class ServiceClient extends Thread {
 				} else {
 					Looper.prepare();
 					Toast.makeText(MyApplication.getcontext(),
-							"对不起，您注册的信息有误，请从新注册！", Toast.LENGTH_SHORT).show();
+							"对不起，您注册的信息有误，请重新注册！", Toast.LENGTH_SHORT).show();
 					Looper.loop();
 				}
 			}
@@ -283,23 +298,62 @@ public class ServiceClient extends Thread {
 			
 			// 解析 后台发送来的车队成员 经纬度信息
 			if("MEMBER_LOCATION_DATA".equals(datatype)){
-				try{
-					for(int i = 1; i <= (connetJSon.length()-2)/3; i++){
-						// 把非本车的经纬度添加到cargroup_member_Location
-						if (!(connetJSon.getString("veh"+i+"_id").equals(MyApplication.user_name)) ){
-							Car_Data mCar_Data = new Car_Data();
-							mCar_Data.lat_cloud = Double.valueOf(connetJSon.getString("veh"+i+"_lat"));
-							mCar_Data.longi_cloud = Double.valueOf(connetJSon.getString("veh"+i+"_lon"));
-							mCar_Data.user_name = connetJSon.getString("veh"+i+"_id");
-							cargroup_member_Location.put(i , mCar_Data);
-						}
-					}	
-					Log.i(TAG, "车队成员位置信息"+strResult);
-				}catch(JSONException e){
-					e.printStackTrace();
+				
+				String teamId = connetJSon.getString("team_id");
+				String cargroupMemberInfo = connetJSon.getString("data");
+				cargroup_member.put(teamId, cargroupMemberInfo);
+				for (String intvin : cargroup_member.keySet()) {
+					Log.d(TAG, "cargroup member location is  " +  intvin);
 				}
+				
+				
+//                if (!connetJSon.getString("veh_id").equals(MyApplication.user_name)) {
+//					
+//					try {
+//						Log.d(TAG, "car group member location is sava " + connetJSon.getString("veh_id"));
+//						vin = connetJSon.getString("VIN");
+//						intVin = Integer.valueOf(vin);
+//						if (cargroup_member_Location.containsKey(intVin) && (cargroup_member_LocationWithUsername.containsKey(connetJSon.getString("veh_id")))) {
+//							cargroup_member_Location.get(intVin).lat_cloud = Double.valueOf(connetJSon.getString("veh_lat"));
+//							cargroup_member_Location.get(intVin).longi_cloud = Double.valueOf(connetJSon.getString("veh_lon"));
+//							    
+//						} else if (!cargroup_member_Location.containsKey(intVin) && (cargroup_member_LocationWithUsername.containsKey(connetJSon.getString("veh_id")))){
+//							int hashMapWithVin = cargroup_member_LocationWithUsername.get(connetJSon.getString("veh_id")).vin;
+//							cargroup_member_Location.remove(hashMapWithVin);
+//							cargroup_member_LocationWithUsername.remove(connetJSon.getString("veh_id"));
+//							cargroup_member_LocationRemove.add(hashMapWithVin);
+//							
+//							Car_Data mCar_Data = new Car_Data();
+//							mCar_Data.lat_cloud = Double.valueOf(connetJSon.getString("veh_lat"));
+//							mCar_Data.longi_cloud = Double.valueOf(connetJSon.getString("veh_lon"));
+//							mCar_Data.user_name = connetJSon.getString("veh_id");
+//							mCar_Data.vin = intVin;
+//							cargroup_member_Location.put(intVin, mCar_Data);
+//							cargroup_member_LocationWithUsername.put(mCar_Data.user_name, mCar_Data);
+//							
+//						} else {
+//							Car_Data mCar_Data = new Car_Data();
+//							mCar_Data.lat_cloud = Double.valueOf(connetJSon.getString("veh_lat"));
+//							mCar_Data.longi_cloud = Double.valueOf(connetJSon.getString("veh_lon"));
+//							mCar_Data.user_name = connetJSon.getString("veh_id");
+//							mCar_Data.vin = intVin;
+//							cargroup_member_Location.put(intVin, mCar_Data);
+//							cargroup_member_LocationWithUsername.put(mCar_Data.user_name, mCar_Data);
+//						}   
+//					} catch(Exception e) {
+//						e.printStackTrace();
+//					}
+//					
+//					for (int vin : cargroup_member_Location.keySet()) {
+//						Log.d(TAG, "cargroup member location is  " +  cargroup_member_Location.get(vin).lat_cloud   +   cargroup_member_Location.get(vin).longi_cloud);
+//					}
+//					
+//					Log.d(TAG, "cloud traslation lat is " + connetJSon.getString("veh_lat") + " longi is " + connetJSon.getString("veh_lon"));
+//				
+//				}
+
 			}
-			
+						
 			// 解析 后台发送来的车群组聊天信息
 			if("MEMBER_CHAT".equals(datatype)){
 				chatContent = connetJSon.getString("chatContent");	

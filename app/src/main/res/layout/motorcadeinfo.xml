@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white" >
+
+    <RelativeLayout
+         android:layout_width="match_parent"
+         android:layout_height="50dp"
+         android:background="@drawable/title_bar"
+         android:orientation="horizontal" >
+
+         <Button
+             android:id="@+id/motorcadeinfo_back_btn"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_centerVertical="true"
+             android:layout_marginLeft="10dip"
+             android:background="@drawable/selector_btn_back"
+             android:gravity="center_horizontal|center_vertical"
+             android:text="返回"
+             android:textColor="#ffffff"
+             android:textSize="12sp" />
+
+         <TextView
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_centerInParent="true"
+             android:text="车队详细信息"
+             android:textColor="@color/white"
+             android:textSize="20.0sp" />
+     </RelativeLayout>
+     
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <!-- 车队ID -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="ID："
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        
+        <TextView 
+			android:id="@+id/motorcadeinfo_id"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <!-- 车队名 -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="队名："
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <TextView 
+			android:id="@+id/motorcade_name"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        
+    </LinearLayout>
+    
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <!-- 车队成员数 -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="成员数："
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <TextView 
+			android:id="@+id/motorcade_number"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <!-- 车队类型 -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="车队类型："
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <TextView 
+			android:id="@+id/motorcade_type"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        
+    </LinearLayout>    
+    
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <!-- 车队起点 -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="起点："
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <TextView 
+			android:id="@+id/motorcade_start"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <!-- 车辆终点 -->
+        <TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="终点："
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        <TextView 
+			android:id="@+id/motorcade_end"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:textSize="20sp"
+			android:textColor="@color/black"/>
+        
+    </LinearLayout>   
+    
+    <!-- 加入按钮 -->
+    <Button 
+        android:id="@+id/join_formation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="加入"
+        android:textSize="20sp"
+        android:textColor="@color/black" />
+
+</LinearLayout>

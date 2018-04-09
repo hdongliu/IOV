@@ -97,6 +97,7 @@ public class Manager {
 	}
 
 	public Client getClient(String clientID) {
+		Log.i(TAG, "vector.size()"+vector.size()+"-----------------");
 		for (int i = 0; i < vector.size(); i++) {
 			// System.out.println("[clientID]: TEST 5~~~~~~!!");
 			Client csChatSocket = vector.get(i);
@@ -109,6 +110,7 @@ public class Manager {
 		System.out.println("[Manager.java]There is no " + clientID);
 		return null;
 	}
+	
 
 	public void publish(Client cs, JSONObject out) {
 		cs.send(out);
@@ -134,4 +136,5 @@ public class Manager {
 		}
 		return;
 	}
+
 }

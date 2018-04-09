@@ -12,6 +12,7 @@ public class Car_Data implements Serializable {
 	public double lat_cloud;		//后台发送的经纬度
 	public  double longi_cloud;		//
 	public String user_name;  //车辆名
+	public int vin;//车架号
 	short elev;		//2 Byte
 	int accuracy;	//4 Byte
 	short speed;	//2 Byte(0~32765)

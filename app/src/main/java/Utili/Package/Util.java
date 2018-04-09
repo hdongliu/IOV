@@ -1,6 +1,8 @@
 package Utili.Package;
 
 import org.json.JSONObject;
+import org.yanzi.shareserver.Client;
+import org.yanzi.shareserver.Manager;
 
 import com.Li.serviceThread.ClientManager;
 import com.Li.serviceThread.ServiceClient;
@@ -61,7 +63,20 @@ public class Util {
 			ClientManager.getManager().servicePublish(ct,
 					mJsonObject);
 		}
-		
+	}
+	
+	/*
+	 * 传入一个JSONObject对象，然后发送到MK5
+	 */
+	public static void send_To_MK5(String clientID, JSONObject mJsonObject) {
+		if (Manager.getManager() != null) {
+			Client ct = Manager.getManager().getClient(clientID);
+			// 向MK5发送 Jason包
+			if (ct != null) {
+				Manager.getManager().publish(ct, mJsonObject);
+			}
+			
+		}
 	}
 	
 	/**
@@ -86,25 +101,25 @@ public class Util {
 	/*
 	 * 传入一个百度地图，在它的图层上面添加本车位置
 	 */
-	public static void Display_MyLoc_Marker(BaiduMap mBaidumap) {
-		int lat = MyApplication.Lat_From_MK5;
-		int longi = MyApplication.Long_From_MK5;
-		// LJL 转换成百度地图需要的经纬度
-		if ((lat != 0) && (longi != 0)) {
-			LatLng myAPPlatlong = new LatLng(((double) lat / MyApplication.Scal_to_Covert),
-					((double) longi / MyApplication.Scal_to_Covert));// 纬度，经度
-			MyApplication.LatLong_From_MK5 = Util.GPS_Covert(myAPPlatlong);
-		}
-
-		BitmapDescriptor mIconMaker = BitmapDescriptorFactory
-				.fromResource(R.drawable.icon_marka);// 把图片转化为BitmapDescriptor格式
-
-		MarkerOptions overlayOptions = new MarkerOptions()
-				.position(MyApplication.LatLong_From_MK5).icon(mIconMaker).zIndex(5)
-				.draggable(false);// zIndex没什么用
-		Marker marker = (Marker) (mBaidumap.addOverlay(overlayOptions));
-		marker.setTitle("本车");
-
-	}
+//	public static void Display_MyLoc_Marker(BaiduMap mBaidumap) {
+//		int lat = MyApplication.Lat_From_MK5;
+//		int longi = MyApplication.Long_From_MK5;
+//		// LJL 转换成百度地图需要的经纬度
+//		if ((lat != 0) && (longi != 0)) {
+//			LatLng myAPPlatlong = new LatLng(((double) lat / MyApplication.Scal_to_Covert),
+//					((double) longi / MyApplication.Scal_to_Covert));// 纬度，经度
+//			MyApplication.LatLong_From_MK5 = Util.GPS_Covert(myAPPlatlong);
+//		}
+//
+//		BitmapDescriptor mIconMaker = BitmapDescriptorFactory
+//				.fromResource(R.drawable.icon_marka);// 把图片转化为BitmapDescriptor格式
+//
+//		MarkerOptions overlayOptions = new MarkerOptions()
+//				.position(MyApplication.LatLong_From_MK5).icon(mIconMaker).zIndex(5)
+//				.draggable(false);// zIndex没什么用
+//		Marker marker = (Marker) (mBaidumap.addOverlay(overlayOptions));
+//		marker.setTitle("本车");
+//
+//	}
 	
 }
