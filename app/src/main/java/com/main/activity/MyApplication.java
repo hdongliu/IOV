@@ -39,6 +39,7 @@ public class MyApplication extends Application {
 	public static final double Scal_to_Covert5 = 100000;// 转化MK5发来的经纬度用的比例
 	public static final double Scal_to_Covert7 = 10000000;// 转化MK5发来的经纬度用的比例
 	public static boolean isServerConnect = false;//与服务器连接的标志位
+	public static int readCount = 0;
 
 	public static int Lat_From_MK5 = 0;//MK5发来纬度
 	public static int Long_From_MK5 = 0;//MK5发来经度
@@ -47,7 +48,11 @@ public class MyApplication extends Application {
 	public static int lightState = 0;//红绿灯状态
 	public static int lightRemainTime = 0;//红绿灯时间
 	public static int adviseSpeed = 0;//通过红绿灯时的建议速度
+	public static int redLight = 0;//闯红灯标志
 	public static long TrafficLightReciveTime = 0;
+
+	public static int danger = 0;//预警危险
+	public static long dangerReciveTime = 0;
 	
 	public static ScheduledExecutorService scheduledThreadPool;
 	public static boolean OBDFlag_display = false;
@@ -79,6 +84,10 @@ public class MyApplication extends Application {
 	
 	public static int MK5Scene = 0; //防撞预警场景类型、预警等级数据
 	public static long MK5CarwarnningReciveTime = 0;//用于防撞预警比较时间
+
+	public static int highPriorityScene = 0; //防撞预警高优先级场景类型
+	public static long highPriorityReciveTime = 0;//用于防撞预警高优先级场景比较时间
+	public static int highPriorityDistance = 0;//预警距离
 	
 	public static boolean register_login = false ;//注册时登录的标志位
 	
@@ -100,8 +109,8 @@ public class MyApplication extends Application {
 	public static Double curdistance;//当前距离
 	public static Double advdistance;//建议距离
 	public static String prevehid = null;//入队完成后前车的id
-	
-	
+
+	public static Boolean joinflag = true;//编队时车辆加入同意标准
     
 	@Override
 	public void onCreate() {

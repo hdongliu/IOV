@@ -95,7 +95,7 @@ public class LoginActivity extends FragmentActivity implements
 		initListener();
 		register_Broadcaster();
 
-		account = this.getSharedPreferences(accoountDatabase, Context.MODE_PRIVATE);
+		account = getApplicationContext().getSharedPreferences(accoountDatabase, Context.MODE_PRIVATE);
 		editor = account.edit();
 		isAuto = account.getInt("auto", 0);
 		isCheck = account.getInt("check", 0); // 刚进入界面获取 是否记住密码的状态
@@ -425,6 +425,14 @@ public class LoginActivity extends FragmentActivity implements
 			break;
 		case R.id.offline_to_tabe:
 			LogUtil.i(TAG, "offline_to_tabe-------");
+
+			if (rememberPassword.isChecked()) {
+				editor.putInt("check",1);
+				editor.putString("user", user_name.getText().toString());
+				editor.putString("pass", user_password.getText().toString());
+				editor.commit();
+			}
+
 			Intent mintentTab = new Intent(LoginActivity.this,
 					TabMainActivity.class);
 			startActivity(mintentTab);
@@ -454,7 +462,6 @@ public class LoginActivity extends FragmentActivity implements
 			finish();
 			break;
 		case R.id.btn_login:
-			
 			
 			if (MyApplication.isServerConnect) {
 				try {

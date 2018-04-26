@@ -197,6 +197,7 @@ public class ServiceClient extends Thread {
 
 			if ("LIVE".equals(strResult)) {
 				ServerConnectService.rcvTime = System.currentTimeMillis();
+				Log.i("LIVE", "parseJson: 接收到服务器的心跳数据");
 			}
 			
 			JSONObject connetJSon = new JSONObject(strResult);
@@ -248,6 +249,7 @@ public class ServiceClient extends Thread {
 				if (connetJSon.getBoolean("isDismissSuccess")) {
 					// 如果为后台传来的值为true 则发送广播
 				    cargroup_member_Location.clear();
+				    cargroup_member.clear();
 				    sendDeleteSuccess();
 				} else {
 					Looper.prepare();

@@ -5,6 +5,8 @@ import java.io.Serializable;
 public class leave implements Serializable{
 
 	private String leaveId;
+
+	private int leaveVin;
 	
 	private int position;
 
@@ -23,6 +25,12 @@ public class leave implements Serializable{
 	public void setPosition(int position) {
 		this.position = position;
 	}
-	
-	
+
+	public int getLeaveVin() {
+		return leaveVin;
+	}
+
+	public void setLeaveVin(int leaveVin) {
+		this.leaveVin = leaveVin;
+	}
 }

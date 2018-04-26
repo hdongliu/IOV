@@ -53,6 +53,7 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <!-- gps -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <!-- wifi -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -74,9 +75,9 @@
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
-            android:value="OxFhCl6axZBgB4SvTSuWYITq0wxgF5nS" />
+            android:value="cKZGhO1DLgxbbsxuKyBcPwcsxLSQhTHA" />
         <!-- 王永龙的密钥cKZGhO1DLgxbbsxuKyBcPwcsxLSQhTHA -->
-        <!-- 刘红东  F7ryvWiZ0Exz0mSSRD4UsGF0ckPzEbYa -->
+        <!-- 刘红东  cKZGhO1DLgxbbsxuKyBcPwcsxLSQhTHA -->
         <!-- 张卓鹏  OxFhCl6axZBgB4SvTSuWYITq0wxgF5nS -->
         <!-- com.main.activity.MainActivity -->
         <activity

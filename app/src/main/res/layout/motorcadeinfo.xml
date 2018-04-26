@@ -49,6 +49,7 @@
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
 			android:layout_weight="1"
+			android:singleLine="true"
 			android:textSize="20sp"
 			android:textColor="@color/black"/>
         <!-- 车队名 -->
@@ -63,6 +64,7 @@
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
 			android:layout_weight="1"
+			android:singleLine="true"
 			android:textSize="20sp"
 			android:textColor="@color/black"/>
         
@@ -84,6 +86,7 @@
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
 			android:layout_weight="1"
+			android:singleLine="true"
 			android:textSize="20sp"
 			android:textColor="@color/black"/>
         <!-- 车队类型 -->
@@ -98,6 +101,7 @@
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
 			android:layout_weight="1"
+			android:singleLine="true"
 			android:textSize="20sp"
 			android:textColor="@color/black"/>
         
@@ -119,6 +123,7 @@
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
 			android:layout_weight="1"
+			android:singleLine="true"
 			android:textSize="20sp"
 			android:textColor="@color/black"/>
         <!-- 车辆终点 -->
@@ -133,6 +138,7 @@
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
 			android:layout_weight="1"
+			android:singleLine="true"
 			android:textSize="20sp"
 			android:textColor="@color/black"/>
         

@@ -20,9 +20,11 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 import com.liu.Class.formation;
@@ -106,7 +108,7 @@ public class Client extends Thread {
     public static boolean requestflag = true;
     
     private JSONObject json_motorcadelist = null;
-    
+
 	public Client(Socket s, Context c) {
 		this.socket = s;
 		this.context = c;
@@ -204,11 +206,11 @@ public class Client extends Thread {
 						// 这里将创建编队中的 信息发送到 后台
 						try {
 							JSONObject mJson_team_creation = new JSONObject();
-							mJson_team_creation.put("datatype", "TEAM_REGISTER");
+							mJson_team_creation.put("datatype", "FORMATION_REGISTER");
 							mJson_team_creation.put("fromid", MyApplication.formationid);
 							mJson_team_creation.put("fromtype", "veh");
 							mJson_team_creation.put("team_id", MyApplication.formationid);
-							mJson_team_creation.put("team_name", OverlayDemo.formationName.getText().toString());
+							mJson_team_creation.put("team_name", OverlayDemo.formationName.getText().toString());//OverlayDemo.formationName.getText().toString()
 							mJson_team_creation.put("team_description", "hello,一路同行！");
 							mJson_team_creation.put("team_start", OverlayDemo.formationStart.getText().toString());
 							mJson_team_creation.put("team_end", OverlayDemo.formationEnd.getText().toString());
@@ -216,6 +218,7 @@ public class Client extends Thread {
 							mJson_team_creation.put("team_veh_number", "1");
 							 	
 							Util.send_To_Clound(mJson_team_creation);
+							Log.w(TAG, "parseJson: 已经成功把创建编队的信息发送给服务器！");
 							
 						} catch (JSONException e) {
 							// TODO Auto-generated catch block
@@ -304,28 +307,33 @@ public class Client extends Thread {
 				joinrs.setBehvehid(jsonObject.getString("behvehid"));
 				joinrs.setMembernum(jsonObject.getInt("membernum"));
 				sendJoinResponse(joinrs);
-				
-				if (joinrs.getStatus()) {
-					MyApplication.formationid = joinrs.getFormationid();
-					if (MyApplication.isServerConnect) {
 
-						// 这里将创建编队中的 信息发送到 后台
-						try {
-							JSONObject mJson_team_invite_agree = new JSONObject();
-							mJson_team_invite_agree.put("datatype", "FORMATION_RESPONSE");
-							// 车牌号(被邀请车牌)
-							mJson_team_invite_agree.put("fromtype", "veh");
-							mJson_team_invite_agree.put("fromid", MyApplication.user_name);
-							mJson_team_invite_agree.put("team_id", joinrs.getFormationid());
+				if (MyApplication.joinflag) {
+					MyApplication.joinflag = false;
+					if (joinrs.getStatus()) {
+						MyApplication.formationid = joinrs.getFormationid();
+						if (MyApplication.isServerConnect) {
 
-							Util.send_To_Clound(mJson_team_invite_agree);
-							
-						} catch (JSONException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							// 这里将创建编队中的 信息发送到 后台
+							try {
+								JSONObject mJson_team_invite_agree = new JSONObject();
+								mJson_team_invite_agree.put("datatype", "FORMATION_RESPONSE");
+								// 车牌号(被邀请车牌)
+								mJson_team_invite_agree.put("fromtype", "veh");
+								mJson_team_invite_agree.put("fromid", MyApplication.user_name);
+								mJson_team_invite_agree.put("team_id", joinrs.getFormationid());
+
+								Util.send_To_Clound(mJson_team_invite_agree);
+
+							} catch (JSONException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 						}
 					}
+
 				}
+
 			}
 			
 			// 入队请求后  入队请求车辆进行车队的过程入队提示
@@ -357,17 +365,20 @@ public class Client extends Thread {
 			
 			// 头车解散车队
 			if ("disbandformationsuccess".equals(jsonObject.getString("msgtype"))) {
+				formation_status.clear();//把编队信息状态清除
 				sendDismissFormation();
 				
 				if (MyApplication.isServerConnect) {
 					try {
 						JSONObject mJson_team_dismiss = new JSONObject();
-						mJson_team_dismiss.put("datatype", "TEAM_DISMISS");
+						mJson_team_dismiss.put("datatype", "FORMATION_DISMISS");
 						mJson_team_dismiss.put("team_id", MyApplication.formationid);
 						mJson_team_dismiss.put("fromtype", "veh");
 						mJson_team_dismiss.put("fromid", MyApplication.user_name);
 						
 						Util.send_To_Clound(mJson_team_dismiss);
+
+						Log.w(TAG, "parseJson: 车队被解散同时把解散消息发送给服务器！");
 					} catch (JSONException e) {
 						e.printStackTrace();
 					}
@@ -377,6 +388,7 @@ public class Client extends Thread {
 			// 头车解散车队成功后，通知车队其他车辆车队已经解散了
 			if ("disbandedformation".equals(jsonObject.getString("msgtype"))) {
 				String formationid = jsonObject.getString("formationid");
+				formation_status.clear();
 				sendDismissedFormation(formationid);
 			}
 			
@@ -398,6 +410,7 @@ public class Client extends Thread {
 			if ("leaveformationsuccess".equals(jsonObject.getString("msgtype"))) {
 				leave leavemsg = new leave();
 				leavemsg.setLeaveId(jsonObject.getString("vehid"));
+				leavemsg.setLeaveVin(jsonObject.getInt("vehvin"));
 				leavemsg.setPosition(jsonObject.getInt("positiontype"));
 				sendOtherLeaveSuccess(leavemsg);
 				Log.i(TAG, "车队内要离队的车离队成功");
@@ -420,7 +433,8 @@ public class Client extends Thread {
 				Boolean leave = true;
 				sendLeaveMsg(leave);
 				Log.i(TAG, "离队车辆离队成功");
-				
+				MyApplication.joinflag = true;//把入队标志置为true
+				formation_status.clear();//把编队信息状态清除
 				if (MyApplication.isServerConnect) {
 					try {
 						JSONObject mJson_team_leave = new JSONObject();
@@ -531,6 +545,7 @@ public class Client extends Thread {
 			Log.i(TAG, "[clientID]: " + this.clientID + "!!");
 			
 		}
+
 		/*
 		 * 删除指定的ID
 		 */
@@ -589,6 +604,12 @@ public class Client extends Thread {
 		if (jsonObject.has("msgID")) {
 			switch ((short) jsonObject.getInt("msgID")) {
 			case 0:
+				if (jsonObject.has("Scene")) {
+					MyApplication.highPriorityReciveTime = System.currentTimeMillis();
+					MyApplication.highPriorityScene = jsonObject.getInt("Scene");
+                    MyApplication.highPriorityDistance = jsonObject.getInt("Distance");
+				}
+				break;
 
 			case 1:
 				// ACM(alaCarteMessage)自定义消息：
@@ -648,12 +669,45 @@ public class Client extends Thread {
 				break;
 				
 			case 3:
-				//交通灯和建议车速信息  currentState 为红绿灯的状态，为数字1、2、3。“3”是红灯状态；“2”是黄灯状态；“1”是绿灯状态
-				MyApplication.lightState = jsonObject.getInt("CurrentState");
-				MyApplication.lightRemainTime = jsonObject.getInt("TimeRemain");
-				MyApplication.adviseSpeed = jsonObject.getInt("Speed");
-				MyApplication.TrafficLightReciveTime = System.currentTimeMillis();
+				if (jsonObject.has("CurrentState")) {
+					//交通灯和建议车速信息  currentState 为红绿灯的状态，为数字1、2、3。“3”是红灯状态；“2”是黄灯状态；“1”是绿灯状态
+					MyApplication.lightState = jsonObject.getInt("CurrentState");
+					MyApplication.lightRemainTime = jsonObject.getInt("TimeRemain");
+					MyApplication.adviseSpeed = jsonObject.getInt("Speed_Adv");
+					if (jsonObject.has("RedLight")) {
+                        MyApplication.redLight = jsonObject.getInt("RedLight");
+					}
+					MyApplication.TrafficLightReciveTime = System.currentTimeMillis();
+				}
+
+				if (jsonObject.has("VDanger")) {
+					MyApplication.danger = jsonObject.getInt("VDagner");
+					MyApplication.dangerReciveTime = System.currentTimeMillis();
+				}
+
 				break;
+
+			case 5:
+				if (jsonObject.has("request")) {
+//					Context otherAppContext = createPackageContext("com.Li.register.LoginActivity", Context.CONTEXT_IGNORE_SECURITY);
+					SharedPreferences account = MyApplication.getcontext().getSharedPreferences("login", Context.MODE_PRIVATE);
+				    String license = account.getString("user", "");
+				    if (!license.isEmpty()) {
+				    	JSONObject jsonLicense = new JSONObject();
+				    	jsonLicense.put("License", license);
+				    	Util.send_To_MK5(clientID, jsonLicense);
+					} else {
+
+					}
+				}
+
+				if (jsonObject.has("get")) {
+//					Toast.makeText(this, "", Toast.LENGTH_SHORT).show();
+
+				}
+
+				break;
+
 			case 11:
 				data2.msgID = (short) jsonObject.getInt("msgID");
 				if (jsonObject.has("msgCnt")) {// 消息计数

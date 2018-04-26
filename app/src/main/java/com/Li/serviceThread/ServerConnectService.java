@@ -1,8 +1,11 @@
 package com.Li.serviceThread;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.lang.ref.WeakReference;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -41,11 +44,16 @@ import android.util.Log;
 public class ServerConnectService extends Service {
 
 	private JSONObject out = new JSONObject();
+
 	private final static String TAG = "ServerConnectService";
 
 	/** 心跳检测时间  */
-	private static final long HEART_BEAT_RATE = 3 * 1000;
-	private static final long MAX_HEART_BEAT_RATE = 6 * 1000;
+	private static final long HEART_BEAT_RATE = 1 * 1000;
+	private static final long MAX_HEART_BEAT_RATE = 5 * 1000;
+
+    // 服务器的ip地址和端口
+	private static final String remoteIp = "113.251.222.135";
+	private static final int port = 8888;
 	
 	ServerConnectThread serverConnectThread;
 	/** 弱引用 在引用对象的同时允许对垃圾对象进行回收  */
@@ -56,17 +64,32 @@ public class ServerConnectService extends Service {
 	private static long sendTime = 0L;
 	public static long rcvTime = 0L;
 
+//	public static boolean isConnectService = true;
+
+	private BufferedWriter bw;
+
 	// 发送心跳包
 	private Handler mHandler = new Handler();
 	private Runnable heartBeatRunnable = new Runnable() {
 		@Override
 		public void run() {
 			if (System.currentTimeMillis() - sendTime >= HEART_BEAT_RATE) {
-				boolean isSuccess = sendMsg("LIVE");// 就发送一个字符LIVE, 如果发送失败，就重新初始化一个socket
-				if (!isSuccess && System.currentTimeMillis() - rcvTime >= MAX_HEART_BEAT_RATE) {
+				boolean isSuccess = sendMsg();// 就发送一个字符LIVE, 如果发送失败，就重新初始化一个socket
+				Log.i(TAG, "run: 心跳数据发送是否成功"+isSuccess);
+//                isConnectService = isSuccess;
+				MyApplication.isServerConnect = isSuccess;
+				if (!isSuccess || (rcvTime > 0 && System.currentTimeMillis() - rcvTime >= MAX_HEART_BEAT_RATE)) {
+					Log.e(TAG, "run: 心跳超时与服务器未连接！");
+					Log.e(TAG, "run: isSuccess="+isSuccess);
 					mHandler.removeCallbacks(heartBeatRunnable);
+
+//					releaseLastSocket(ClientManager.getManager().getClient().socketClient);
 					ClientManager.getManager().deleteAll();
-					releaseLastSocket(mSocket);
+
+					rcvTime = 0;
+//					isConnectService = false;
+					MyApplication.isServerConnect = false;
+
 					new ServerConnectThread().start();
 				}
 			}
@@ -75,23 +98,29 @@ public class ServerConnectService extends Service {
 	};
 	
 	// 发送信息
-	public boolean sendMsg(String msg) {
-		if (null == mSocket || null == mSocket.get()) {
+	public boolean sendMsg() {
+		if (null == ClientManager.getManager().getClient()) {
 			return false;
 		}
-		Socket soc = mSocket.get();
+
+//		Socket soc = mSocket.get();
+
+		Socket soc = ClientManager.getManager().getClient().socketClient;
+
 		try {
-			if (!soc.isClosed() && !soc.isOutputShutdown()) {
-				OutputStream os = soc.getOutputStream();
-				String message = msg;
-				os.write(message.getBytes());
-				os.flush();
-				sendTime = System.currentTimeMillis();// 每次发送成功数据，就改一下最后成功发送的时间，节省心跳间隔时间
-				Log.i(TAG, "发送成功的时间：" + sendTime);
-			} else {
-				return false;
-			}
-		} catch (IOException e) {
+			 if (!soc.isClosed() && !soc.isOutputShutdown()) {
+				 Util.send_To_Clound(out);
+//				 bw = new BufferedWriter(new OutputStreamWriter(soc.getOutputStream()));
+//				 bw.write(out.toString());
+//				 bw.flush();
+//				 Log.i(TAG, "sendMsg: "+out.toString());
+				 sendTime = System.currentTimeMillis();// 每次发送成功数据，就改一下最后成功发送的时间，节省心跳间隔时间
+//				 Log.i(TAG, "发送成功的时间：" + sendTime);
+			 } else {
+				 return false;
+			 }
+
+		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
 		}
@@ -99,15 +128,15 @@ public class ServerConnectService extends Service {
 	}
 	
 	// 释放socket
-	private void releaseLastSocket(WeakReference<Socket> mSocket) {
+	private void releaseLastSocket(Socket mSocket) {
 		try {
 			if (null != mSocket) {
-				Socket sk = mSocket.get();
-				if (!sk.isClosed()) {
-					sk.close();
+//				Socket sk = mSocket.get();
+				if (!mSocket.isClosed()) {
+					mSocket.close();
 				}
-				sk = null;
-				mSocket = null;
+//				sk = null;
+//				mSocket = null;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -118,6 +147,13 @@ public class ServerConnectService extends Service {
 	public void onCreate() {
 		// TODO Auto-generated method stub
 		super.onCreate();
+
+		try {
+			out.put("datatype", "LIVE");
+			out.put("fromtype", "veh");
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 		serverConnectThread = new ServerConnectThread();
 		serverConnectThread.start();
 	}
@@ -160,9 +196,10 @@ public class ServerConnectService extends Service {
 					Log.i(TAG, "准备连接到 后台！");
 //					Socket socketClient = new Socket("113.251.164.234", 8888);// 后台IP端口号//TCP协议改成UDP协议
 //					Socket socketClient = new Socket("202.202.43.240", 8888);// 学校服务器的ip地址
-					Socket socketClient = new Socket("113.251.216.36", 8888);// 后台IP端口号，外网ip
+					Socket socketClient = new Socket(remoteIp, port);// 后台IP端口号，外网ip
 //					Socket socketClient = new Socket("172.22.136.242", 8888);// 后台IP端口号 ,内网IP
-				mSocket = new WeakReference<Socket>(socketClient);
+					Log.i(TAG, "run: 连接成功");
+//					mSocket = new WeakReference<Socket>(socketClient);
 					Log.i(TAG, "已经连接到 后台！"); 
 					serviceClient = new ServiceClient(socketClient, ServerConnectService.this);
 					serviceClient.start();
@@ -171,7 +208,7 @@ public class ServerConnectService extends Service {
 					 */
 					ClientManager.getManager().add(serviceClient);
 					MyApplication.isServerConnect = true;
-//					mHandler.postDelayed(heartBeatRunnable, HEART_BEAT_RATE);// 初始化成功后，就准备发送心跳包
+					mHandler.postDelayed(heartBeatRunnable, HEART_BEAT_RATE);// 初始化成功后，就准备发送心跳包
 					
 				} catch (UnknownHostException e) {
 					// TODO Auto-generated catch block
