@@ -365,31 +365,38 @@ public class Client extends Thread {
 			
 			// 头车解散车队
 			if ("disbandformationsuccess".equals(jsonObject.getString("msgtype"))) {
-				formation_status.clear();//把编队信息状态清除
-				sendDismissFormation();
-				
-				if (MyApplication.isServerConnect) {
-					try {
-						JSONObject mJson_team_dismiss = new JSONObject();
-						mJson_team_dismiss.put("datatype", "FORMATION_DISMISS");
-						mJson_team_dismiss.put("team_id", MyApplication.formationid);
-						mJson_team_dismiss.put("fromtype", "veh");
-						mJson_team_dismiss.put("fromid", MyApplication.user_name);
-						
-						Util.send_To_Clound(mJson_team_dismiss);
+				if (!MyApplication.formationDismissFlag) {
+					MyApplication.formationDismissFlag = true;
+					formation_status.clear();//把编队信息状态清除
+					sendDismissFormation();
 
-						Log.w(TAG, "parseJson: 车队被解散同时把解散消息发送给服务器！");
-					} catch (JSONException e) {
-						e.printStackTrace();
+					if (MyApplication.isServerConnect) {
+						try {
+							JSONObject mJson_team_dismiss = new JSONObject();
+							mJson_team_dismiss.put("datatype", "FORMATION_DISMISS");
+							mJson_team_dismiss.put("team_id", MyApplication.formationid);
+							mJson_team_dismiss.put("fromtype", "veh");
+							mJson_team_dismiss.put("fromid", MyApplication.user_name);
+
+							Util.send_To_Clound(mJson_team_dismiss);
+
+							Log.w(TAG, "parseJson: 车队被解散同时把解散消息发送给服务器！");
+						} catch (JSONException e) {
+							e.printStackTrace();
+						}
 					}
 				}
 			}
 			
 			// 头车解散车队成功后，通知车队其他车辆车队已经解散了
 			if ("disbandedformation".equals(jsonObject.getString("msgtype"))) {
-				String formationid = jsonObject.getString("formationid");
-				formation_status.clear();
-				sendDismissedFormation(formationid);
+				if (!MyApplication.formationDismissedFlag) {
+					MyApplication.formationDismissedFlag = true;
+					String formationid = jsonObject.getString("formationid");
+					formation_status.clear();
+					sendDismissedFormation(formationid);
+				}
+
 			}
 			
 			//头车允许请求离队的车离队
@@ -408,13 +415,17 @@ public class Client extends Thread {
 			
 			//车队内要离队的车离队成功
 			if ("leaveformationsuccess".equals(jsonObject.getString("msgtype"))) {
-				leave leavemsg = new leave();
-				leavemsg.setLeaveId(jsonObject.getString("vehid"));
-				leavemsg.setLeaveVin(jsonObject.getInt("vehvin"));
-				leavemsg.setPosition(jsonObject.getInt("positiontype"));
-				sendOtherLeaveSuccess(leavemsg);
-				Log.i(TAG, "车队内要离队的车离队成功");
+				if (!MyApplication.leaveOtherFormation) {
+					MyApplication.leaveOtherFormation = true;
+					leave leavemsg = new leave();
+					leavemsg.setLeaveId(jsonObject.getString("vehid"));
+					leavemsg.setLeaveVin(jsonObject.getInt("vehvin"));
+					leavemsg.setPosition(jsonObject.getInt("positiontype"));
+					sendOtherLeaveSuccess(leavemsg);
+					Log.i(TAG, "车队内要离队的车离队成功" + jsonObject.getInt("vehvin"));
+			   }
 			}
+
 			//离队车辆离队后，通知车队内其他车辆有离队
 //			if ("leaveformationmessage".equals(jsonObject.getString("msgtype"))) {
 //				String leaveId = jsonObject.getString("vehid");
@@ -430,23 +441,29 @@ public class Client extends Thread {
 			
 			// 离队车辆离队成功
 			if ("nativeleaveformationsuccessmessage".equals(jsonObject.getString("msgtype"))) {
-				Boolean leave = true;
-				sendLeaveMsg(leave);
-				Log.i(TAG, "离队车辆离队成功");
-				MyApplication.joinflag = true;//把入队标志置为true
-				formation_status.clear();//把编队信息状态清除
-				if (MyApplication.isServerConnect) {
-					try {
-						JSONObject mJson_team_leave = new JSONObject();
-						mJson_team_leave.put("datatype", "TEAM_EXIT");
-						mJson_team_leave.put("team_id", MyApplication.formationid);
-						mJson_team_leave.put("fromtype", "veh");
-						mJson_team_leave.put("fromid", MyApplication.user_name);
-						
-						Util.send_To_Clound(mJson_team_leave);
-					} catch (JSONException e) {
-						e.printStackTrace();
+				if (!MyApplication.ownerLeaveFlag) {
+					MyApplication.ownerLeaveFlag = true;
+					Boolean leave = true;
+
+					Log.i(TAG, "离队车辆离队成功");
+					MyApplication.joinflag = true;//把入队标志置为true
+					formation_status.clear();//把编队信息状态清除
+					sendLeaveMsg(leave);
+					Log.i(TAG, "离队车辆离队成功的消息广播成功");
+					if (MyApplication.isServerConnect) {
+						try {
+							JSONObject mJson_team_leave = new JSONObject();
+							mJson_team_leave.put("datatype", "TEAM_EXIT");
+							mJson_team_leave.put("team_id", MyApplication.formationid);
+							mJson_team_leave.put("fromtype", "veh");
+							mJson_team_leave.put("fromid", MyApplication.user_name);
+
+							Util.send_To_Clound(mJson_team_leave);
+						} catch (JSONException e) {
+							e.printStackTrace();
+						}
 					}
+
 				}
 			}
 			
@@ -467,6 +484,8 @@ public class Client extends Thread {
 			LatLocalNumber = jsonObject.getInt("Lat_Local");
 			
 			MyApplication.isMk5LatLng = true;
+
+			Log.w(TAG, "parseJson: mk5已经连接，接收到其经纬度为+"+LongLocalNumber+"+"+LatLocalNumber );
 		}
 		
 		// obd data 解析 wangyonglong

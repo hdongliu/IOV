@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -13,6 +14,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
+import android.util.StateSet;
 
 import com.Li.serviceThread.ServerConnectService;
 import com.baidu.mapapi.SDKInitializer;
@@ -110,7 +112,15 @@ public class MyApplication extends Application {
 	public static Double advdistance;//建议距离
 	public static String prevehid = null;//入队完成后前车的id
 
-	public static Boolean joinflag = true;//编队时车辆加入同意标准
+	public static Boolean joinflag = true;//编队时车辆加入同意标志
+
+	public static Boolean ownerLeaveFlag = false;//编队时离队的的标志
+
+	public static Boolean formationDismissFlag = false;//编队解散标志位
+
+	public static Boolean formationDismissedFlag = false;//对于编队内其他车编队被解散的标志位
+
+	public static Boolean leaveOtherFormation = false;//对于编队内又其他车离队的标志位
     
 	@Override
 	public void onCreate() {
