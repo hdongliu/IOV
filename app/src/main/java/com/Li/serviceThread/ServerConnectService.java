@@ -52,7 +52,7 @@ public class ServerConnectService extends Service {
 	private static final long MAX_HEART_BEAT_RATE = 5 * 1000;
 
     // 服务器的ip地址和端口
-	private static final String remoteIp = "113.251.222.135";
+	private static final String remoteIp = "113.250.155.170";
 	private static final int port = 8888;
 	
 	ServerConnectThread serverConnectThread;

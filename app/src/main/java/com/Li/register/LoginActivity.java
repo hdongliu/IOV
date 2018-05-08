@@ -12,6 +12,8 @@ import com.main.activity.TabMainActivity;
 
 import Utili.Package.LogUtil;
 import Utili.Package.Util;
+
+import android.Manifest;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.BroadcastReceiver;
@@ -20,9 +22,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -163,8 +169,8 @@ public class LoginActivity extends FragmentActivity implements
 				}
 			}
 		});
-		
 
+		initPermission();
 	}
 	
 	@Override
@@ -482,6 +488,26 @@ public class LoginActivity extends FragmentActivity implements
 			}
 			
 			break;
+		}
+	}
+
+	//权限申请
+	private void initPermission() {
+
+		if (PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+			// 进入到这里代表没有权限.
+			ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, 123);
+		}
+
+	}
+
+	@Override
+	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+		switch (requestCode) {
+			case 123:
+				if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+				}
 		}
 	}
 

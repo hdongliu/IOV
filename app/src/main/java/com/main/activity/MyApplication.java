@@ -112,7 +112,7 @@ public class MyApplication extends Application {
 	public static Double advdistance;//建议距离
 	public static String prevehid = null;//入队完成后前车的id
 
-	public static Boolean joinflag = true;//编队时车辆加入同意标志
+	public static Boolean joinflag = false;//编队时车辆加入同意标志
 
 	public static Boolean ownerLeaveFlag = false;//编队时离队的的标志
 

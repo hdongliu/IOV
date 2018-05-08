@@ -5,6 +5,7 @@ import java.net.Socket;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -14,7 +15,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -61,6 +66,7 @@ public class RegisterActivity extends Activity implements OnClickListener {
 		mRegister_Receiver();// 注册后台发来的注册成功的广播，准备接收
 		initView();
 		mShare_Preference_Init();//
+		initPermission();
 	}
 
 	private void mRegister_Receiver() {
@@ -147,6 +153,8 @@ public class RegisterActivity extends Activity implements OnClickListener {
 			} else {
 				Toast.makeText(RegisterActivity.this,"该账号已经被注册，请重新注册！", Toast.LENGTH_SHORT).show();
 			}
+
+
 			
 		}
 	}
@@ -239,6 +247,26 @@ public class RegisterActivity extends Activity implements OnClickListener {
 						RegisterActivity.this.finish();
 					}
 				}).setNegativeButton("取消", null).create().show();
+	}
+
+	//权限申请
+	private void initPermission() {
+
+		if (PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+			// 进入到这里代表没有权限.
+			ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, 123);
+		}
+
+	}
+
+	@Override
+	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+		switch (requestCode) {
+			case 123:
+				if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+				}
+		}
 	}
 
 }

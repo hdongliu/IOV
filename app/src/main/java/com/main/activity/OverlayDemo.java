@@ -1,5 +1,6 @@
 package com.main.activity;
 
+import java.lang.reflect.Array;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -18,6 +19,7 @@ import org.yanzi.shareserver.Car_Data;
 import org.yanzi.shareserver.Client;
 import org.yanzi.shareserver.Manager;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -25,12 +27,16 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
@@ -394,9 +400,14 @@ public class OverlayDemo extends Activity
     
     // 存储编队中车辆经纬度的标注图标
     private static HashMap<String, Marker> formationMarker = new HashMap<String, Marker>();
-    
+
+	String[] marker_array;
+	private  static List<String> removeMarker = new ArrayList<String>();
+	// 从mk5接收到的当前编队的成员信息 临时存储
+
+	private static HashMap<String, Integer> formationVehid_temp = new HashMap<String, Integer>();
     // 从mk5接收到的当前编队的成员信息
-    private static HashMap<String, String> formationVehid = new HashMap<String, String>();//使用vehid作为键
+    private static HashMap<String, Integer> formationVehid = new HashMap<String, Integer>();//使用vehid作为键
 	private static HashMap<Integer, Integer> formationVehvin = new HashMap<Integer, Integer>();//存储当前编队的车辆vin
     
     private static String vin;
@@ -773,6 +784,7 @@ public class OverlayDemo extends Activity
 				}
 			}
 		}).start();
+
 	}
 
 	private void Test_Car_cloud() {
@@ -1324,9 +1336,11 @@ public class OverlayDemo extends Activity
 				        JSONObject vehicleStatus = jsonArray.getJSONObject(i);
 
 				        String vehid = vehicleStatus.getString("vehid");
+				        Integer vehvin = vehicleStatus.getInt("vehvin");
 				        if (!vehid.equals(MyApplication.localvehid)) {
-							formationVehid.put(vehid, "vehid");
-							formationVehvin.put(vehicleStatus.getInt("vehvin"), 0);
+				        	formationVehid_temp.put(vehid, vehvin);
+							formationVehid.put(vehid, vehvin);
+							formationVehvin.put(vehvin, 0);
 						}
 				    }
 
@@ -1336,7 +1350,6 @@ public class OverlayDemo extends Activity
 						}
 					}
 
-
 				} catch (Exception e) {
 					// TODO: handle exception
 				}
@@ -1345,18 +1358,25 @@ public class OverlayDemo extends Activity
 
 	    	//移除已经离队车辆的图标
 		    if (!formationMarker.isEmpty()) {
-				for (int i = 0; i < formationMarker.keySet().size(); i++) {
-//					Log.w("liuhongdong", "formationMarker中车辆id为："+formationMarker.keySet().toArray()[i]);
-					if (!formationVehid.containsKey(formationMarker.keySet().toArray()[i])) {
-//						Log.i("liuhongdong", "此次的移除车辆id为："+formationMarker.keySet().toArray()[i]);
-						formationMarker.get(formationMarker.keySet().toArray()[i]).remove();
-						formationMarker.remove(formationMarker.keySet().toArray()[i]);
-
+		    	int MarkerLen = formationMarker.keySet().size();
+				marker_array = formationMarker.keySet().toArray(new String[0]);
+				for (int i = 0; i < MarkerLen; i++) {
+					if (!formationVehid.containsKey(marker_array[i])) {
+						removeMarker.add(marker_array[i]);
 					}
 				}
+
+				if (!removeMarker.isEmpty()) {
+					for (String s : removeMarker) {
+						formationMarker.get(s).remove();
+						formationMarker.remove(s);
+						formationVehvin.remove(formationVehid_temp.get(s));
+					}
+					removeMarker.clear();
+				}
+
 				formationVehid.clear();
 		    }
-
 
 			new Thread() {
 				private BitmapDescriptor mIconMaker;
@@ -1571,6 +1591,8 @@ public class OverlayDemo extends Activity
 		mSearch = RoutePlanSearch.newInstance();
 		mSearch.setOnGetRoutePlanResultListener(this);
 
+
+
 		//师姐截图
 //		BitmapDescriptor bdA = BitmapDescriptorFactory
 //				.fromResource(R.drawable.icon_marka);
@@ -1684,12 +1706,12 @@ public class OverlayDemo extends Activity
 				builder.target(ll).zoom(18.0f);
 				mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
 			}
-//			else {
-//				LatLng ll = new LatLng(location.getLatitude(), location.getLongitude());
-//				MapStatus.Builder builder = new MapStatus.Builder();
-//				builder.target(ll);//.zoom(18.0f)
-//				mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
-//			}
+			else {
+				LatLng ll = new LatLng(location.getLatitude(), location.getLongitude());
+				MapStatus.Builder builder = new MapStatus.Builder();
+				builder.target(ll);//.zoom(18.0f)
+				mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+			}
 
 
 
@@ -3619,6 +3641,8 @@ public class OverlayDemo extends Activity
 //					mBaiduMap.clear();
 					FormationSelfLatLng = null;
 //					formationMarker.clear();
+
+					veh_dismiss_btn.setText("");
 				}
 			}, 3000);
 		}
@@ -3659,6 +3683,8 @@ public class OverlayDemo extends Activity
 //					mBaiduMap.clear();
 					FormationSelfLatLng = null;
 //					formationMarker.clear();
+
+					veh_dismiss_btn.setText("");
 				}
 			}, 3000);
 		}
@@ -3822,6 +3848,7 @@ public class OverlayDemo extends Activity
 				} else {
 					isFormationLeaveClean = false;
 				}
+
 				Log.i(TAG, "onReceive: 数据清除完成");
 				leaveVehid.setText("车辆离队成功！");
 				otherleaveformation_layout.setVisibility(View.VISIBLE);
@@ -3837,6 +3864,8 @@ public class OverlayDemo extends Activity
 //						mBaiduMap.clear();
 						
 //						formationMarker.clear();
+
+						veh_dismiss_btn.setText("");//解散/离队按钮清除
 						
 					}
 				}, 3000);
@@ -4105,5 +4134,4 @@ public class OverlayDemo extends Activity
 
 	}
 
-	
 }

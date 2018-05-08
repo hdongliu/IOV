@@ -201,6 +201,7 @@ public class Client extends Thread {
 				MyApplication.rcvTime_cfresponse = System.currentTimeMillis();
 				
 				if (MyApplication.createstatus) {
+					MyApplication.joinflag = true;
 					if (MyApplication.isServerConnect) {
 
 						// 这里将创建编队中的 信息发送到 后台
@@ -229,19 +230,21 @@ public class Client extends Thread {
 			}
 			
 			// 接收车队状态信息
-			if ("vehlist".equals(jsonObject.getString("msgtype"))) {									
-				MyApplication.formationid = jsonObject.getString("formationid");
-				MyApplication.vehicle_numbers = jsonObject.getInt("membervehnum");
-				MyApplication.localvehid = jsonObject.getString("localvehid");
-				MyApplication.vehnum = jsonObject.getInt("vehnum");
-				MyApplication.curspeed = jsonObject.getDouble("curspeed");
-				MyApplication.advspeed = jsonObject.getDouble("advspeed");
-				MyApplication.curdistance = jsonObject.getDouble("curdistance");
-				MyApplication.advdistance = jsonObject.getDouble("advdistance");
-				MyApplication.prevehid = jsonObject.getString("prevehid");
-				Log.i(TAG, "接收车队状态信息------------"+MyApplication.formationid);
-				String vehiclelist = jsonObject.getString("vehiclelist");
- 				formation_status.put(jsonObject.getString("formationid"), vehiclelist);
+			if ("vehlist".equals(jsonObject.getString("msgtype"))) {
+				if (MyApplication.joinflag) {
+					MyApplication.formationid = jsonObject.getString("formationid");
+					MyApplication.vehicle_numbers = jsonObject.getInt("membervehnum");
+					MyApplication.localvehid = jsonObject.getString("localvehid");
+					MyApplication.vehnum = jsonObject.getInt("vehnum");
+					MyApplication.curspeed = jsonObject.getDouble("curspeed");
+					MyApplication.advspeed = jsonObject.getDouble("advspeed");
+					MyApplication.curdistance = jsonObject.getDouble("curdistance");
+					MyApplication.advdistance = jsonObject.getDouble("advdistance");
+					MyApplication.prevehid = jsonObject.getString("prevehid");
+					Log.i(TAG, "接收车队状态信息------------"+MyApplication.formationid);
+					String vehiclelist = jsonObject.getString("vehiclelist");
+					formation_status.put(jsonObject.getString("formationid"), vehiclelist);
+				}
 			}
 			
 			// 点击查询车队后，接收mk5回复的附近的车队
@@ -308,9 +311,9 @@ public class Client extends Thread {
 				joinrs.setMembernum(jsonObject.getInt("membernum"));
 				sendJoinResponse(joinrs);
 
-				if (MyApplication.joinflag) {
-					MyApplication.joinflag = false;
+				if (!MyApplication.joinflag) {
 					if (joinrs.getStatus()) {
+						MyApplication.joinflag = true;
 						MyApplication.formationid = joinrs.getFormationid();
 						if (MyApplication.isServerConnect) {
 
@@ -367,9 +370,10 @@ public class Client extends Thread {
 			if ("disbandformationsuccess".equals(jsonObject.getString("msgtype"))) {
 				if (!MyApplication.formationDismissFlag) {
 					MyApplication.formationDismissFlag = true;
+					MyApplication.joinflag = false;
 					formation_status.clear();//把编队信息状态清除
 					sendDismissFormation();
-
+					Log.w(TAG, "parseJson: 收到编队解散disbandformationsuccess");
 					if (MyApplication.isServerConnect) {
 						try {
 							JSONObject mJson_team_dismiss = new JSONObject();
@@ -392,6 +396,7 @@ public class Client extends Thread {
 			if ("disbandedformation".equals(jsonObject.getString("msgtype"))) {
 				if (!MyApplication.formationDismissedFlag) {
 					MyApplication.formationDismissedFlag = true;
+					MyApplication.joinflag = false;
 					String formationid = jsonObject.getString("formationid");
 					formation_status.clear();
 					sendDismissedFormation(formationid);
@@ -446,7 +451,7 @@ public class Client extends Thread {
 					Boolean leave = true;
 
 					Log.i(TAG, "离队车辆离队成功");
-					MyApplication.joinflag = true;//把入队标志置为true
+					MyApplication.joinflag = false;//把入队标志置为false
 					formation_status.clear();//把编队信息状态清除
 					sendLeaveMsg(leave);
 					Log.i(TAG, "离队车辆离队成功的消息广播成功");
@@ -688,6 +693,8 @@ public class Client extends Thread {
 				break;
 				
 			case 3:
+
+				//交通灯信息和闯红灯
 				if (jsonObject.has("CurrentState")) {
 					//交通灯和建议车速信息  currentState 为红绿灯的状态，为数字1、2、3。“3”是红灯状态；“2”是黄灯状态；“1”是绿灯状态
 					MyApplication.lightState = jsonObject.getInt("CurrentState");
@@ -699,9 +706,15 @@ public class Client extends Thread {
 					MyApplication.TrafficLightReciveTime = System.currentTimeMillis();
 				}
 
+				//道路危险
 				if (jsonObject.has("VDanger")) {
 					MyApplication.danger = jsonObject.getInt("VDagner");
 					MyApplication.dangerReciveTime = System.currentTimeMillis();
+				}
+
+				//限速
+				if (jsonObject.has("VLimit")) {
+
 				}
 
 				break;
