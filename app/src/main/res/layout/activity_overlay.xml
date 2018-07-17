@@ -434,7 +434,7 @@
         <!-- 消息推送界面 -->
         <LinearLayout
             android:id="@+id/msgpush_linearlayout"
-            android:layout_width="250dp"
+            android:layout_width="350dp"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
@@ -1645,9 +1645,7 @@
 			       layout="@layout/otherleaveformation" />
 	        
 	    </RelativeLayout>
-	    
-    
-	    	    	    
+
     </RelativeLayout>
 
 </LinearLayout>

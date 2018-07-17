@@ -11,8 +11,8 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
-        aaptOptions.cruncherEnabled = false
-        aaptOptions.useNewCruncher = false
+//        aaptOptions.cruncherEnabled = false //PNG图片是否可以大量快速的处理，boolean类型。 true表示可以, false表示不可以
+//        aaptOptions.useNewCruncher = false
     }
     buildTypes {
         release {
@@ -30,9 +30,4 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.+'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
-    compile files('libs/baidumapapi_v3_5_0.jar')
-    compile files('libs/fastjson-1.1.36.jar')
-    compile files('libs/locSDK_5.2.jar')
-    compile files('libs/Msc.jar')
-    compile files('libs/pinyin4j-2.5.0.jar')
 }

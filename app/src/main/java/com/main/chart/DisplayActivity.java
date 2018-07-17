@@ -2,6 +2,7 @@ package com.main.chart;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.json.JSONException;
@@ -28,6 +29,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.Li.LogFile.LogcatHelper;
@@ -99,6 +101,8 @@ public class DisplayActivity extends Activity implements OnClickListener {
 	public static boolean flag = false;
 	Context context1;
 
+	private TextView logText;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -106,6 +110,13 @@ public class DisplayActivity extends Activity implements OnClickListener {
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		
 		setContentView(R.layout.group);
+
+		logText = (TextView) findViewById(R.id.logText);
+		LogReceiver logReceiver = new LogReceiver();
+		IntentFilter logFilter = new IntentFilter();
+		logFilter.addAction("com.liu.client.logText");
+		registerReceiver(logReceiver, logFilter);
+
 		util = new SharePreferenceUtil(DisplayActivity.this, "saveUserID");
 
 		// application = (MyApplication) this.getApplicationContext();//
@@ -754,6 +765,22 @@ public class DisplayActivity extends Activity implements OnClickListener {
 
 		ServiceClient.isConnect = false;
 
+	}
+
+	//msgID信息接收广播
+	private class  LogReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			HashMap<Integer, Integer> logHM = (HashMap<Integer, Integer>) intent.getSerializableExtra("log");
+			StringBuffer logBuffer = new StringBuffer();
+			if (!logHM.isEmpty()) {
+				for (Integer i : logHM.keySet()) {
+					logBuffer.append("msgID:").append(i).append("\n");
+				}
+				logText.setText(logBuffer);
+			}
+
+		}
 	}
 
 }

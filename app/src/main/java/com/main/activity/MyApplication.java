@@ -51,10 +51,15 @@ public class MyApplication extends Application {
 	public static int lightRemainTime = 0;//红绿灯时间
 	public static int adviseSpeed = 0;//通过红绿灯时的建议速度
 	public static int redLight = 0;//闯红灯标志
+	public static int Pass = 0;//通过标志
 	public static long TrafficLightReciveTime = 0;
 
 	public static int danger = 0;//预警危险
 	public static long dangerReciveTime = 0;
+
+	public static int limitSpeed = 0;//限速
+
+	public static int VSign = 0;//车内标牌
 	
 	public static ScheduledExecutorService scheduledThreadPool;
 	public static boolean OBDFlag_display = false;
@@ -86,6 +91,7 @@ public class MyApplication extends Application {
 	
 	public static int MK5Scene = 0; //防撞预警场景类型、预警等级数据
 	public static long MK5CarwarnningReciveTime = 0;//用于防撞预警比较时间
+	public static int Mk5SceneDistance = 0;//
 
 	public static int highPriorityScene = 0; //防撞预警高优先级场景类型
 	public static long highPriorityReciveTime = 0;//用于防撞预警高优先级场景比较时间
@@ -121,7 +127,9 @@ public class MyApplication extends Application {
 	public static Boolean formationDismissedFlag = false;//对于编队内其他车编队被解散的标志位
 
 	public static Boolean leaveOtherFormation = false;//对于编队内又其他车离队的标志位
-    
+
+	public static HashMap<Integer, Integer> logHM = new HashMap<Integer, Integer>();//保存msgID
+
 	@Override
 	public void onCreate() {
 		// 应用程序入口处调用,避免手机内存过小，杀死后台进程,造成SpeechUtility对象为null

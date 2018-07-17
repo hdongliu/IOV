@@ -1,7 +1,5 @@
 package com.main.activity;
 
-import java.lang.reflect.Array;
-import java.net.UnknownHostException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -10,16 +8,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.yanzi.shareserver.Car_Data;
 import org.yanzi.shareserver.Client;
-import org.yanzi.shareserver.Manager;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -27,16 +22,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.location.Location;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
@@ -48,7 +38,6 @@ import android.view.View.OnTouchListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -60,7 +49,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.Li.data.SharePreferenceUtil;
-import com.Li.serviceThread.CarGroup;
 import com.Li.serviceThread.ClientManager;
 import com.Li.serviceThread.ServiceClient;
 import com.baidu.location.BDLocation;
@@ -85,7 +73,6 @@ import com.baidu.mapapi.map.MyLocationConfiguration.LocationMode;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.model.LatLng;
-import com.baidu.mapapi.model.LatLngBounds;
 import com.baidu.mapapi.overlayutil.DrivingRouteOverlay;
 import com.baidu.mapapi.search.core.SearchResult;
 import com.baidu.mapapi.search.route.DrivingRouteLine;
@@ -117,19 +104,16 @@ import com.liu.Class.joinresponse;
 import com.liu.Class.leave;
 import com.liu.Class.request;
 import com.liu.Class.selfadjust;
+import com.liu.Class.vehicle;
 import com.main.TCPService.TCPService;
-import com.main.activity.R;
 import com.main.baiduMap.Group;
 import com.main.baiduMap.Group.FBackBtnClickListener;
 import com.main.baiduMap.Group.FCreakBtnClickListener;
 import com.main.baiduMap.MyOrientationListener;
 import com.main.chart.ChatMsgEntity;
 import com.main.chart.ChatMsgViewAdapter;
-import com.main.chart.DisplayActivity;
-import com.main.chart.DisplayActivity.MsgReceiver;
 import com.main.utilTools.MyDate;
 
-import Utili.Package.LogUtil;
 import Utili.Package.ToastUtil;
 import Utili.Package.Util;
 import Utili.Package.ViewHolder;
@@ -159,7 +143,9 @@ public class OverlayDemo extends Activity
 
 	// UI相关
 	Button requestLocButton;
-	boolean isFirstLoc = true; // 是否首次定位
+	boolean isFirstLoc = true; // 是否网络首次定位
+	boolean isFirstMK5Loc = true;//是否MK5首次定位
+
 	private MyLocationData locData;
 
 	private RelativeLayout create_cargroup_fragmentRelative, map;
@@ -420,6 +406,8 @@ public class OverlayDemo extends Activity
  	
  	private LatLng FormationSelfLatLng = null;//编队本车的经纬度
  	private DecimalFormat df = new DecimalFormat("0.00");
+
+ 	private int deleteIdFromMk5 = 0;//mk5远离的车辆id
  	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -479,8 +467,9 @@ public class OverlayDemo extends Activity
 					if (MyApplication.OBDFlag_display) {// OBD显示
 						myHandler.sendEmptyMessage(0x002);
 					}
-					if (MyApplication.MK5InfoFlag || (MyApplication.houtai_msg_push != null)) {// 消息推送
+					if (MyApplication.MK5InfoFlag) {// 消息推送
 						myHandler.sendEmptyMessage(0x003);
+						MyApplication.MK5InfoFlag = false;
 					}
 					if ((!ServiceClient.cargroup_member.isEmpty()) && (count >= 5)) {// 其他车辆
 						myHandler.sendEmptyMessage(0x004);// 添加车队成员信息位置
@@ -512,73 +501,7 @@ public class OverlayDemo extends Activity
 						
 						MyApplication.team_dismiss = false;
 						count_dismiss = 0;
-					}            
-					
-					// 防撞预警--张卓鹏
-					if (1 == MyApplication.MK5Scene / 1000) { // ***1.交叉路口碰撞预警
-						myHandler.sendEmptyMessage(0x008);
 					}
-																																		
-					if (2 == MyApplication.MK5Scene / 1000) { // 2.左转辅助
-						myHandler.sendEmptyMessage(0x009);
-					}
-					if (3 == MyApplication.MK5Scene / 1000) { // ***3.紧急制动预警
-						myHandler.sendEmptyMessage(0x010);
-					}
-					if (4 == MyApplication.MK5Scene / 1000) { // ***4.逆向超车碰撞预警
-						myHandler.sendEmptyMessage(0x011);
-					}
-					if (5 == MyApplication.MK5Scene / 1000) { // ***5.逆向行驶告警（会车）
-						myHandler.sendEmptyMessage(0x012);
-					}
-					if (6 == MyApplication.MK5Scene / 1000) { // 6.盲区预警/变道辅助
-						myHandler.sendEmptyMessage(0x013);
-					}
-					if (7 == MyApplication.MK5Scene / 1000) { // ***7.前方静止/慢速车辆告警
-						myHandler.sendEmptyMessage(0x014);
-					}
-					if (8 == MyApplication.MK5Scene / 1000) { // 8.异常车辆预警
-						myHandler.sendEmptyMessage(0x015);
-					}
-					if (9 == MyApplication.MK5Scene / 1000) { // 9.车辆失控预警
-						myHandler.sendEmptyMessage(0x016);
-					}
-					if (10 == MyApplication.MK5Scene / 1000) { // 10.弱势交通参与者预警
-						myHandler.sendEmptyMessage(0x017);
-					}
-					if (11 == MyApplication.MK5Scene / 1000) { // 11.摩托车预警
-						myHandler.sendEmptyMessage(0x018);
-					}
-					if (12 == MyApplication.MK5Scene / 1000) { // 12.道路危险状况提示
-						myHandler.sendEmptyMessage(0x019);
-					}
-					if (13 == MyApplication.MK5Scene / 1000) { // 13.限速预警
-						myHandler.sendEmptyMessage(0x020);
-					}
-					if (14 == MyApplication.MK5Scene / 1000) { // 14.闯红灯预警
-						myHandler.sendEmptyMessage(0x021);
-					}
-					if (15 == MyApplication.MK5Scene / 1000) { // 15.路口设施辅助紧急车辆预警
-						myHandler.sendEmptyMessage(0x022);
-					}
-					if (16 == MyApplication.MK5Scene / 1000) { // 16.基于环境物体感知的安全驾驶辅助提示
-						myHandler.sendEmptyMessage(0x023);
-					}
-					if (17 == MyApplication.MK5Scene / 1000) { // ***17.前向碰撞预警
-						myHandler.sendEmptyMessage(0x024);
-					}
-					if (18 == MyApplication.MK5Scene / 1000) { // 18.侧向碰撞预警
-						myHandler.sendEmptyMessage(0x025);
-					}
-					if (19 == MyApplication.MK5Scene / 1000) { // ***19.后方碰撞预警
-						myHandler.sendEmptyMessage(0x026);
-					}
-					if (41 == MyApplication.MK5Scene / 1000) { // ***41.会车预警
-						myHandler.sendEmptyMessage(0x048);
-					}
-//					if (0 == MyApplication.MK5Scene) { // ***0.清除警示图片
-//						myHandler.sendEmptyMessage(0x049);
-//					}
 					
 					//创建编队回复
 					if (MyApplication.createstatus) {
@@ -703,7 +626,6 @@ public class OverlayDemo extends Activity
 					//更新车辆状态
 					if (!TextUtils.isEmpty(MyApplication.localvehid)) {
 						myHandler.sendEmptyMessage(0x030);
-						Log.i("liuhongdong", "更新车辆状态-----------"+MyApplication.localvehid);
 					}
 					
 					// 读取显示车队列表
@@ -712,19 +634,42 @@ public class OverlayDemo extends Activity
 //						myHandler.sendEmptyMessage(0x030);
 //					}
 
-
-					//高优先级防撞预警场景
-					if (MyApplication.highPriorityScene != 0) {
-						myHandler.sendEmptyMessage(0x031);
+					//防撞预警场景
+					if (MyApplication.MK5Scene != 0) {
+						Message msg = Message.obtain();
+						msg.what = 0x031;
+						msg.obj = MyApplication.MK5Scene;
+						myHandler.sendMessage(msg);
+						MyApplication.MK5Scene = 0;
 					}
 
 					//危险预警
 					if (MyApplication.danger != 0) {
-						myHandler.sendEmptyMessage(0x032);
+						Message msg = Message.obtain();
+						msg.what = 0x032;
+						msg.obj = MyApplication.danger%1000;
+						myHandler.sendMessage(msg);
+						MyApplication.danger = 0;
+					}
+
+					//限速
+					if (MyApplication.limitSpeed != 0) {
+						Message msg = Message.obtain();
+						msg.what = 0x033;
+						msg.obj = MyApplication.limitSpeed%1000;
+						myHandler.sendMessage(msg);
+						MyApplication.limitSpeed = 0;
+					}
+
+					//车内标牌
+					if (MyApplication.VSign != 0) {
+						Message msg = Message.obtain();
+						msg.what = 0x034;
+						msg.obj = MyApplication.VSign%1000;
+						myHandler.sendMessage(msg);
+						MyApplication.VSign = 0;
 					}
 				
-					
-					
                     //给服务器发送车辆的经纬度信息
 					if (Util.isNetworkAvailable(OverlayDemo.this) && (countlatlng >= 10)){
 						countlatlng = 0;
@@ -1004,17 +949,27 @@ public class OverlayDemo extends Activity
                     //显示建议速度
                     if (MyApplication.adviseSpeed != 0) {
                         advisespeed_linearlayout.setVisibility(View.VISIBLE);
-                        advise_speed.setText(String.valueOf(MyApplication.adviseSpeed));
+                        advise_speed.setText(String.valueOf(MyApplication.adviseSpeed%1000));
                     } else {
                     	advisespeed_linearlayout.setVisibility(View.GONE);
                     }
 
                     //闯红灯提醒
                     if (MyApplication.redLight != 0) {
+						if (true == Sound_Switch) {
+							mTts.startSpeaking("请勿闯红灯", mTtsListener);
+							MyApplication.redLight = 0;
+						}
+					}
+
+					//能否通过红绿灯
+					if (MyApplication.Pass != 0) {
+
 
 					}
                     
 				}
+
 				//清理交通灯和建议速度
 				if (msg.what == 0x0011) {
 					light.setVisibility(View.GONE);
@@ -1057,108 +1012,6 @@ public class OverlayDemo extends Activity
 					mBaiduMap.clear();
 				}
 				
-				// 防撞预警警示
-				if (0x008 == msg.what) { // ***1.交叉路口碰撞预警
-					if (3 == MyApplication.MK5Scene % 10) { // 声音警示
-											
-						if (true == Sound_Switch) {
-							mTts.startSpeaking("前方路口有碰撞危险", mTtsListener);
-//							MyApplication.MK5Scene = 0 ; //直接清空原来发送过来的Scene值之后，图片无法消失（UIhandler无法进入？）
-						}
-					}
-					if (1 == (MyApplication.MK5Scene % 100)/10) { // 左侧路口
-						anti_collision_linearlayout.setVisibility(View.VISIBLE);
-						anti_collision_linearlayout.setBackgroundResource(R.drawable.warning1011);
-					}
-					if (2 == (MyApplication.MK5Scene % 100)/10) { // 右侧路口
-						anti_collision_linearlayout.setVisibility(View.VISIBLE);
-						anti_collision_linearlayout.setBackgroundResource(R.drawable.warning1021);
-					}
-				}
-				 if (0x010 == msg.what) { // ***3.紧急制动预警
-					 if (3 == MyApplication.MK5Scene % 10) { // 声音警示
-							if (true == Sound_Switch) {
-								mTts.startSpeaking("前方车辆紧急刹车", mTtsListener);
-							}
-					 }
-					 anti_collision_linearlayout.setVisibility(View.VISIBLE);
-					 anti_collision_linearlayout.setBackgroundResource(R.drawable.warning3001);
-											
-	  
-				 }
-		
-//				if (0x011 == msg.what) { // ***4.逆向超车碰撞预警
-//					if (3 == MyApplication.MK5Scene % 10) {			
-//						if (true == Sound_Switch) {
-//							mTts.startSpeaking("当前路段超车可能发生碰撞危险，请谨慎驾驶", mTtsListener);
-//						}
-//					}
-//					anti_collision_linearlayout.setVisibility(View.VISIBLE);
-//					anti_collision_linearlayout.setBackgroundResource(R.drawable.image_view_car_warning_overtaking);
-//				}
-				if (0x012 == msg.what) { // ***5.逆向行驶告警（会车）
-					if (3 == MyApplication.MK5Scene % 10) {				
-						if (true == Sound_Switch) {
-							mTts.startSpeaking("当前路段会车可能发生碰撞", mTtsListener);
-						}
-					}
-					anti_collision_linearlayout.setVisibility(View.VISIBLE);
-					anti_collision_linearlayout.setBackgroundResource(R.drawable.image_view_car_warning_missing);
-				}
-				 if (0x014 == msg.what) { // ***7.前方静止/慢速车辆告警
-					 if (3 == MyApplication.MK5Scene % 10) {				
-							if (true == Sound_Switch) {
-								mTts.startSpeaking("前方车辆行驶缓慢", mTtsListener);
-							}
-					 }
-					 anti_collision_linearlayout.setVisibility(View.VISIBLE);
-					 anti_collision_linearlayout.setBackgroundResource(R.drawable.warning7001);
-				 }
-	  
-		
-		
-				if (0x024 == msg.what) { // ***17.前向碰撞预警
-															 
-					if (3 == MyApplication.MK5Scene % 10) {
-						if (true == Sound_Switch) {
-							mTts.startSpeaking("前方车辆碰撞危险", mTtsListener);
-						}
-					}
-					anti_collision_linearlayout.setVisibility(View.VISIBLE);
-					anti_collision_linearlayout.setBackgroundResource(R.drawable.warning17001);
-				}
-	
-				if (0x026 == msg.what) { // ***19.后方碰撞预警
-															 
-																										 
-					if (3 == MyApplication.MK5Scene % 10) {
-						if (true == Sound_Switch) {
-							mTts.startSpeaking("后方车辆碰撞危险", mTtsListener);
-						}
-					}
-					anti_collision_linearlayout.setVisibility(View.VISIBLE);
-					anti_collision_linearlayout.setBackgroundResource(R.drawable.warning19001);
-				}
-				if (0x048 == msg.what) { // ***41.会车预警
-					if (3 == MyApplication.MK5Scene % 10) {
-						if (true == Sound_Switch) {
-							mTts.startSpeaking("前方会车预警", mTtsListener);
-						}
-					}
-					anti_collision_linearlayout.setVisibility(View.VISIBLE);
-					anti_collision_linearlayout.setBackgroundResource(R.drawable.warning41001);
-				}
-				
-//				// 当MK5发送0消息时，清除图片
-//				if (0x049 == msg.what) { // ***0.清除警示图片
-//					anti_collision_linearlayout.setVisibility(View.GONE);
-//				}
-				// 当预警图片显示3s之后消失  
-				if (System.currentTimeMillis() - MyApplication.MK5CarwarnningReciveTime >= MAX_LIMIT_TIME) {
-					anti_collision_linearlayout.setVisibility(View.GONE);
-					MyApplication.MK5Scene = 0;
-				}
-				
 				// 显示创建编队的回复页面
 				if (0x027 == msg.what) {
 					create_formation_response_layout.setVisibility(View.VISIBLE);
@@ -1170,14 +1023,12 @@ public class OverlayDemo extends Activity
 					create_formation_response_layout.setVisibility(View.GONE);
 					veh_dismiss_btn.setText("解散");
 					motorcade_status_layout.setVisibility(View.VISIBLE);
-
 				}
 				
 				// 更新编队图标的状态
 				if (0x029 == msg.what) {
 				    updateFormationStatus(Client.formation_status);
 				}
-				
 				
 				// 更新车辆状态
 				if (0x030 == msg.what) {
@@ -1191,112 +1042,251 @@ public class OverlayDemo extends Activity
 					vehicle_advdistance.setText(String.valueOf(df.format(MyApplication.advdistance)));//Math.floor(MyApplication.advdistance)
 				}
 
-				//解析高优先级
+				//防撞预警
 				if (0x031 == msg.what) {
-					switch (MyApplication.highPriorityScene%1000) {
-						case 252:
-
-							break;
-						case 253:
-
-							break;
-						case 254:
-                            //有120紧急车
-							if (true == Sound_Switch) {
-								mTts.startSpeaking("前方"+MyApplication.highPriorityDistance+"米有120救护车辆", mTtsListener);
+					int scene = (int)  msg.obj;
+					int sceneKey = scene/1000;
+					int sceneValue = scene%1000;
+					switch (sceneKey) {
+						//交叉路口碰撞预警
+						case 1:
+							//最后一位代表预警等级：1,2,3
+							if (sceneValue%10 == 3) {
+								if (true == Sound_Switch) {
+									mTts.startSpeaking("前方路口有碰撞危险", mTtsListener);
+								}
 							}
+							//第二位代表左右方向：1是左，2是右
+							if (sceneValue%100/10 == 1) {
+								anti_collision_linearlayout.setBackgroundResource(R.drawable.warning1011);
+								anti_collision_linearlayout.setVisibility(View.VISIBLE);
+								anti_collision_linearlayout.postDelayed(new Runnable() {
+									@Override
+									public void run() {
+										anti_collision_linearlayout.setVisibility(View.GONE);
+									}
+								}, 3000);
 
-							anti_collision_linearlayout.setBackgroundResource(R.drawable.warning23254);
+							}
+							if (sceneValue%100/10 == 2) {
+								anti_collision_linearlayout.setBackgroundResource(R.drawable.warning1021);
+								anti_collision_linearlayout.setVisibility(View.VISIBLE);
+								anti_collision_linearlayout.postDelayed(new Runnable() {
+									@Override
+									public void run() {
+										anti_collision_linearlayout.setVisibility(View.GONE);
+									}
+								}, 3000);
+
+							}
+							break;
+
+						//紧急制动预警
+						case 3:
+							if (sceneValue%10 == 3) {
+								if (true == Sound_Switch) {
+									mTts.startSpeaking("前方车辆紧急刹车", mTtsListener);
+								}
+							}
+							anti_collision_linearlayout.setVisibility(View.VISIBLE);
+							anti_collision_linearlayout.setBackgroundResource(R.drawable.warning3001);
+							anti_collision_linearlayout.postDelayed(new Runnable() {
+								@Override
+								public void run() {
+									anti_collision_linearlayout.setVisibility(View.GONE);
+								}
+							}, 3000);
+
+							break;
+
+						//逆向超车碰撞预警
+						case 4:
+							if (sceneValue%10 == 3) {
+								if (true == Sound_Switch) {
+									mTts.startSpeaking("请勿超车", mTtsListener);
+								}
+							}
+							anti_collision_linearlayout.setBackgroundResource(R.drawable.image_view_car_warning_overtaking);
 							anti_collision_linearlayout.setVisibility(View.VISIBLE);
 							anti_collision_linearlayout.postDelayed(new Runnable() {
 								@Override
 								public void run() {
 									anti_collision_linearlayout.setVisibility(View.GONE);
-									MyApplication.highPriorityScene = 0;
-									MyApplication.highPriorityDistance = 0;
-									MyApplication.highPriorityReciveTime = 0;
 								}
 							}, 3000);
 							break;
-						case 255:
-							//异常车
-							if (true == Sound_Switch) {
-								mTts.startSpeaking("前方"+MyApplication.highPriorityDistance+"米有异常车辆", mTtsListener);
-							}
 
-							anti_collision_linearlayout.setBackgroundResource(R.drawable.warning8255);
+						//前方静止/慢速车辆警告
+						case 7:
+							if (sceneValue%10 == 3) {
+								if (true == Sound_Switch) {
+									mTts.startSpeaking("前方车辆行驶缓慢", mTtsListener);
+								}
+							}
+							anti_collision_linearlayout.setVisibility(View.VISIBLE);
+							anti_collision_linearlayout.setBackgroundResource(R.drawable.warning7001);
+							anti_collision_linearlayout.postDelayed(new Runnable() {
+								@Override
+								public void run() {
+									anti_collision_linearlayout.setVisibility(View.GONE);
+								}
+							}, 3000);
+							break;
+						//异常车辆
+						case 8:
+							switch (sceneValue) {
+								case 255:
+									//异常车
+									if (true == Sound_Switch) {
+										mTts.startSpeaking("前方"+MyApplication.Mk5SceneDistance+"米有异常车辆", mTtsListener);
+									}
+									anti_collision_linearlayout.setBackgroundResource(R.drawable.warning8255);
+									anti_collision_linearlayout.setVisibility(View.VISIBLE);
+									anti_collision_linearlayout.postDelayed(new Runnable() {
+										@Override
+										public void run() {
+											anti_collision_linearlayout.setVisibility(View.GONE);
+										}
+									}, 3000);
+									break;
+								default:
+									break;
+							}
+							break;
+
+                        //异常车辆
+						case 9:
+							switch (sceneValue) {
+								case 0:
+									//失控车辆
+									if (true == Sound_Switch) {
+										mTts.startSpeaking("前方"+MyApplication.highPriorityDistance+"米有失控车", mTtsListener);
+									}
+
+									anti_collision_linearlayout.setBackgroundResource(R.drawable.warning9000);
+									anti_collision_linearlayout.setVisibility(View.VISIBLE);
+									MyApplication.highPriorityScene = 0;
+									anti_collision_linearlayout.postDelayed(new Runnable() {
+										@Override
+										public void run() {
+											anti_collision_linearlayout.setVisibility(View.GONE);
+											MyApplication.highPriorityDistance = 0;
+											MyApplication.highPriorityReciveTime = 0;
+										}
+									}, 3000);
+									break;
+
+								default:
+									break;
+							}
+							break;
+
+						//前方碰撞预警
+						case 17:
+							if (sceneValue%10 == 3) {
+								if (true == Sound_Switch) {
+									mTts.startSpeaking("前方车辆碰撞危险", mTtsListener);
+								}
+							}
+							anti_collision_linearlayout.setBackgroundResource(R.drawable.warning17001);
 							anti_collision_linearlayout.setVisibility(View.VISIBLE);
 							anti_collision_linearlayout.postDelayed(new Runnable() {
 								@Override
 								public void run() {
 									anti_collision_linearlayout.setVisibility(View.GONE);
-									MyApplication.highPriorityScene = 0;
-									MyApplication.highPriorityDistance = 0;
-									MyApplication.highPriorityReciveTime = 0;
 								}
 							}, 3000);
 							break;
-						case 000:
-							if (true == Sound_Switch) {
-								mTts.startSpeaking("前方"+MyApplication.highPriorityDistance+"米有失控车", mTtsListener);
-							}
 
-							anti_collision_linearlayout.setBackgroundResource(R.drawable.warning9000);
+						//后方碰撞预警
+						case 19:
+							if (sceneValue%10 == 3) {
+								if (true == Sound_Switch) {
+									mTts.startSpeaking("后方车辆碰撞危险", mTtsListener);
+								}
+							}
 							anti_collision_linearlayout.setVisibility(View.VISIBLE);
+							anti_collision_linearlayout.setBackgroundResource(R.drawable.warning19001);
 							anti_collision_linearlayout.postDelayed(new Runnable() {
 								@Override
 								public void run() {
 									anti_collision_linearlayout.setVisibility(View.GONE);
-									MyApplication.highPriorityScene = 0;
-									MyApplication.highPriorityDistance = 0;
-									MyApplication.highPriorityReciveTime = 0;
 								}
 							}, 3000);
 							break;
+
+						//高优先级车
+						case 23:
+							switch (sceneValue) {
+								case 252:
+									//110
+									break;
+
+								case 253:
+									//119
+
+									break;
+
+								case 254:
+									//120
+									if (true == Sound_Switch) {
+										mTts.startSpeaking("前方"+MyApplication.Mk5SceneDistance+"米有120救护车辆", mTtsListener);
+									}
+
+									anti_collision_linearlayout.setBackgroundResource(R.drawable.warning23254);
+									anti_collision_linearlayout.setVisibility(View.VISIBLE);
+									anti_collision_linearlayout.postDelayed(new Runnable() {
+										@Override
+										public void run() {
+											anti_collision_linearlayout.setVisibility(View.GONE);
+										}
+									}, 3000);
+									break;
+
+								default:
+									break;
+							}
+							break;
+
+						//会车预警
+						case 41:
+							if (sceneValue%10 == 3) {
+								if (true == Sound_Switch) {
+									mTts.startSpeaking("前方会车预警", mTtsListener);
+								}
+							}
+							anti_collision_linearlayout.setVisibility(View.VISIBLE);
+							anti_collision_linearlayout.setBackgroundResource(R.drawable.warning41001);
+							anti_collision_linearlayout.postDelayed(new Runnable() {
+								@Override
+								public void run() {
+									anti_collision_linearlayout.setVisibility(View.GONE);
+								}
+							}, 3000);
+
+							break;
+
 						default:
 							break;
 
 					}
 				}
 
-				// 高优先级预警图片显示3s之后消失
-//				if (System.currentTimeMillis() - MyApplication.highPriorityReciveTime >= MAX_LIMIT_TIME) {
-//					anti_collision_linearlayout.setVisibility(View.GONE);
-//					MyApplication.highPriorityScene = 0;
-//					MyApplication.highPriorityDistance = 0;
-//					MyApplication.highPriorityReciveTime = 0;
-//				}
-
 				//危险预警
 				if (0x032 == msg.what) {
-					switch (MyApplication.danger%1000) {
-						case 001:
-							if (true == Sound_Switch) {
-								mTts.startSpeaking("前方道路施工", mTtsListener);
-							}
-
-							anti_collision_linearlayout.setBackgroundResource(R.drawable.warning12001);
-							anti_collision_linearlayout.setVisibility(View.VISIBLE);
-							anti_collision_linearlayout.postDelayed(new Runnable() {
-								@Override
-								public void run() {
-									anti_collision_linearlayout.setVisibility(View.GONE);
-									MyApplication.danger = 0;
-								}
-							}, 3000);
-							break;
-						case 002:
+					int vDanger = (int)msg.obj;
+					switch (vDanger) {
+						case 134:
 							if (true == Sound_Switch) {
 								mTts.startSpeaking("前方交通事故", mTtsListener);
 							}
 
-							anti_collision_linearlayout.setBackgroundResource(R.drawable.warning12002);
+							anti_collision_linearlayout.setBackgroundResource(R.drawable.danger12134);
 							anti_collision_linearlayout.setVisibility(View.VISIBLE);
 							anti_collision_linearlayout.postDelayed(new Runnable() {
 								@Override
 								public void run() {
 									anti_collision_linearlayout.setVisibility(View.GONE);
-									MyApplication.danger = 0;
 								}
 							}, 3000);
 							break;
@@ -1305,23 +1295,43 @@ public class OverlayDemo extends Activity
 					}
 				}
 
-				// 危险预警图片显示3s之后消失
-//				if (System.currentTimeMillis() - MyApplication.dangerReciveTime >= MAX_LIMIT_TIME) {
-//					anti_collision_linearlayout.setVisibility(View.GONE);
-//					MyApplication.danger = 0;
-//
-//				}
+				//前方限速
+				if (0x033 == msg.what) {
+					int limitSpeed = (int) msg.obj;
+					if (true == Sound_Switch) {
+						mTts.startSpeaking("前方限速" + limitSpeed + "公里每小时", mTtsListener);
+					}
+				}
 
+				//车内标牌
+				if (0x034 == msg.what) {
+					int vSign = (int) msg.obj;
+					switch (vSign) {
+						case 138:
+							if (true == Sound_Switch) {
+								mTts.startSpeaking("前方施工", mTtsListener);
+							}
 
-
+							anti_collision_linearlayout.setBackgroundResource(R.drawable.sign26138);
+							anti_collision_linearlayout.setVisibility(View.VISIBLE);
+							anti_collision_linearlayout.postDelayed(new Runnable() {
+								@Override
+								public void run() {
+									anti_collision_linearlayout.setVisibility(View.GONE);
+								}
+							}, 3000);
+							break;
+						default:
+							break;
+					}
+				}
 
 			}
 		};
 
 	}
-	
-	
-	
+
+
 	// 更新编队的状态
 	private void updateFormationStatus(final HashMap<String, String> formationStatus) {
 		
@@ -1496,6 +1506,14 @@ public class OverlayDemo extends Activity
 				    	} else {
 				    		addMarkerFromMk5.get(key).setPosition(otherLLWithbd09ll);
 				    	}
+
+				    	//移除mk5远离的车辆图标
+				    	if (key.equals(deleteIdFromMk5)) {
+				    		addMarkerFromMk5.get(key).remove();
+				    		addMarkerFromMk5.remove(key);
+				    		deleteIdFromMk5 = 0;
+						}
+
 				    } 
 				    else {
 				    	if (addMarkerFromMk5.containsKey(key)) {
@@ -1507,11 +1525,22 @@ public class OverlayDemo extends Activity
 
 				}
 
-				if (!addMarkerFromMk5.isEmpty()) {
-					for (Integer i : addMarkerFromMk5.keySet()){
-						Log.w(TAG, "run: addMarkerFromMk5 = "+ i);
+				//与mk5连接断开后，清除图标
+				if (!TCPService.Flag_Connection_MK5) {
+					Iterator<Integer> it = addMarkerFromMk5.keySet().iterator();
+					if (it.hasNext()) {
+						addMarkerFromMk5.get(it.next()).remove();
+						addMarkerFromMk5.remove(it.next());
 					}
+					Client.Other_Car_map.clear();
+
 				}
+
+//				if (!addMarkerFromMk5.isEmpty()) {
+//					for (Integer i : addMarkerFromMk5.keySet()){
+//						Log.w(TAG, "run: addMarkerFromMk5 = "+ i);
+//					}
+//				}
 
 			}
 
@@ -1526,6 +1555,13 @@ public class OverlayDemo extends Activity
 		houtai_tv_ifo.setText(MyApplication.houtai_msg_push);
 		MK5_tv_push_ifo.setVisibility(View.VISIBLE);
 		MK5_tv_push_ifo.setText(MyApplication.MK5Info);
+		msgpush_linearlayout.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				msgpush_linearlayout.setVisibility(View.GONE);
+				houtai_ifo_rl_layout.setVisibility(View.GONE);
+			}
+		}, 3000);
 
 	}
 
@@ -1635,45 +1671,16 @@ public class OverlayDemo extends Activity
 			mCurrentLon = location.getLongitude();
 			mCurrentAccracy = location.getRadius();
 
-//			LatLng llB = new LatLng(29.5370360, 106.602212777);
-//			CoordinateConverter converterB = new CoordinateConverter();
-//			converterB.from(CoordinateConverter.CoordType.GPS);
-//			converterB.coord(llB);
-//			llB = converterB.convert();
+			Log.i(TAG, "onReceiveLocation:GPS定位经纬度 "+mCurrentLat+","+mCurrentLon);
 
-			Log.i(TAG, "onReceiveLocation:GPS定位纬度 "+mCurrentLat);
-			Log.i(TAG, "onReceiveLocation: GPS定位经度"+mCurrentLon);
-			
+			//判断与MK5的连接是否连接
+			if (!TCPService.Flag_Connection_MK5) {
+				MyApplication.isMk5LatLng = false;
+			}
+
 			// 判断是否有MK5的经纬度
-			if (MyApplication.isMk5LatLng) {
-				// Log.i(tag, "isMK5FirstLocation == 2 中------>>>>");
-
-				// LJL 转换成百度地图需要的经纬度
-				CoordinateConverter converter = new CoordinateConverter();
-				converter.from(CoordinateConverter.CoordType.GPS);
-				LatLng sourceLatLng;
-				//判断经纬度的位数
-				if ((Client.LatLocalNumber / 100000000) > 0 && (Client.LongLocalNumber / 1000000000) > 0) {
-					sourceLatLng = new LatLng(((double) (Client.LatLocalNumber)) / MyApplication.Scal_to_Covert7,
-							((double) (Client.LongLocalNumber)) / MyApplication.Scal_to_Covert7);
-				} else {
-					sourceLatLng = new LatLng(((double) (Client.LatLocalNumber)) / MyApplication.Scal_to_Covert5,
-							((double) (Client.LongLocalNumber)) / MyApplication.Scal_to_Covert5);
-				}
-				converter.coord(sourceLatLng);
-				desLatLng1 = converter.convert();
-
-				Log.w("MK5Location", "MapActivity 中 自身MK5的    原始 纬度  是：" + String.valueOf(Client.LatLocalNumber));
-				Log.w("MK5Location", "MapActivity 中 自身MK5的    原始 经度 是：" + String.valueOf(Client.LongLocalNumber));
-
-				Log.w("MK5Location", "MapActivity 中 自身MK5的    转换后的 纬度  是：" + String.valueOf(desLatLng1.latitude));
-				Log.w("MK5Location", "MapActivity 中 自身MK5的      转换后的 经度  是：" + String.valueOf(desLatLng1.longitude));
-
-				locData = new MyLocationData.Builder().accuracy(location.getRadius())
-						// 此处设置开发者获取到的方向信息，顺时针0-360
-						.direction(mCurrentDirection).latitude(desLatLng1.latitude)
-						.longitude(desLatLng1.longitude).build();
-				mBaiduMap.setMyLocationData(locData);
+			if (MyApplication.isMk5LatLng && desLatLng1!= null) {
+				mk5Navi(desLatLng1);
 
 			} else if (FormationSelfLatLng != null) {//编队是本车的定位数据
 				locData = new MyLocationData.Builder().accuracy(location.getRadius())
@@ -1684,20 +1691,16 @@ public class OverlayDemo extends Activity
 //				FormationSelfLatLng = null;
 				Log.w(TAG, "onReceiveLocation:编队定位纬度 "+FormationSelfLatLng.latitude);
 				Log.w(TAG, "onReceiveLocation: 编队定位经度"+FormationSelfLatLng.longitude);
-				
-			}
-			else {
+
+			} else{
 				// 如果Mk5没有发定位数据，就使用网络定位数据
 				locData = new MyLocationData.Builder().accuracy(location.getRadius())
 						// 此处设置开发者获取到的方向信息，顺时针0-360
 						.direction(mCurrentDirection).latitude(location.getLatitude())
 						.longitude(location.getLongitude()).build();
 				mBaiduMap.setMyLocationData(locData);
-				Log.w(TAG, "onReceiveLocation:网络定位纬度 "+location.getLatitude());
-				Log.w(TAG, "onReceiveLocation: 网络定位经度"+location.getLongitude());
+
 			}
-
-
 
 			if (isFirstLoc) {
 				isFirstLoc = false;
@@ -1706,22 +1709,39 @@ public class OverlayDemo extends Activity
 				builder.target(ll).zoom(18.0f);
 				mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
 			}
-			else {
-				LatLng ll = new LatLng(location.getLatitude(), location.getLongitude());
-				MapStatus.Builder builder = new MapStatus.Builder();
-				builder.target(ll);//.zoom(18.0f)
-				mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
-			}
 
 
-
-
+//			else {
+//				LatLng ll = new LatLng(location.getLatitude(), location.getLongitude());
+//				MapStatus.Builder builder = new MapStatus.Builder();
+//				builder.target(ll);//.zoom(18.0f)
+//				mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+//			}
 
 
 		}
 
 		public void onReceivePoi(BDLocation poiLocation) {
 		}
+	}
+
+	//来自Mk5经纬度的定位
+	private void mk5Navi(LatLng mk5LatLon){
+        //地图绘制
+		if (isFirstMK5Loc) {
+//		    isFirstMK5Loc = false;
+			LatLng ll = new LatLng(mk5LatLon.latitude, mk5LatLon.longitude);
+			MapStatus.Builder builder = new MapStatus.Builder();
+			builder.target(ll);
+			mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+		}
+
+		//定位图标数据设置
+		locData = new MyLocationData.Builder()
+				// 此处设置开发者获取到的方向信息，顺时针0-360
+				.direction(mCurrentDirection).latitude(mk5LatLon.latitude)
+				.longitude(mk5LatLon.longitude).build();
+		mBaiduMap.setMyLocationData(locData);
 	}
 
 	private void initView() {
@@ -2518,10 +2538,21 @@ public class OverlayDemo extends Activity
 		if (mCurrentLat == 0.0f || mCurrentLon == 0.0) {// 没有获取到定位返回
 			return;
 		}
-		LatLng ll = new LatLng(mCurrentLat, mCurrentLon);
-		MapStatus.Builder builder = new MapStatus.Builder();
-		builder.target(ll).zoom(18.0f);
-		mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+
+		if (desLatLng1!=null) {
+			LatLng ll = new LatLng(desLatLng1.latitude, desLatLng1.longitude);
+			MapStatus.Builder builder = new MapStatus.Builder();
+			builder.target(ll).zoom(18.0f);
+			mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+
+		} else {
+			LatLng ll = new LatLng(mCurrentLat, mCurrentLon);
+			MapStatus.Builder builder = new MapStatus.Builder();
+			builder.target(ll).zoom(18.0f);
+			mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+		}
+
+
 	}
 
 	private void initReceiver() {
@@ -2657,6 +2688,12 @@ public class OverlayDemo extends Activity
 		IntentFilter intentFilter21 = new IntentFilter();
 		intentFilter21.addAction("com.liu.Client.sendLeaveMsg");
 		registerReceiver(leaveMsgReceiver, intentFilter21);
+
+		//本车车辆信息
+		VehicleMsgReceiver vehicleMsgReceiver = new VehicleMsgReceiver();
+		IntentFilter intentFilter22 = new IntentFilter();
+		intentFilter22.addAction("com.liu.client.locallatlon");
+		registerReceiver(vehicleMsgReceiver, intentFilter22);
 	}
 
 	// 车群组创建按钮监听点击方法
@@ -3319,11 +3356,8 @@ public class OverlayDemo extends Activity
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			int deleteId = intent.getIntExtra("deleteId", 0);
-			Log.i(TAG, "deleteID will--------- delete success----------------");
 			if (deleteId != 0) {
-				addMarkerFromMk5.get(deleteId).remove();
-				addMarkerFromMk5.remove(deleteId);
-				Log.i(TAG, "deleteID always delete success----------------");
+				deleteIdFromMk5 = deleteId;
 			}
 		}
 	}
@@ -3882,7 +3916,35 @@ public class OverlayDemo extends Activity
 				}, 3000);
 			}
 		}
-		
+
+	}
+
+	//接收本车经纬度相关信息
+	private class VehicleMsgReceiver extends BroadcastReceiver{
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			vehicle localmsg = (vehicle) intent.getSerializableExtra("locallatlon");
+			int localId = localmsg.getId();
+			int localLat = localmsg.getLat();
+			int localLon = localmsg.getLon();
+
+			//转换经纬度坐标
+			CoordinateConverter converter = new CoordinateConverter();
+			converter.from(CoordinateConverter.CoordType.GPS);
+			LatLng sourceLatLng;
+			//判断经纬度的位数
+			if ((localLat / 100000000) > 0 && (localLon / 1000000000) > 0) {
+				sourceLatLng = new LatLng(((double) (localLat)) / MyApplication.Scal_to_Covert7,
+						((double) (localLon)) / MyApplication.Scal_to_Covert7);
+			} else {
+				sourceLatLng = new LatLng(((double) (localLat)) / MyApplication.Scal_to_Covert5,
+						((double) (localLon)) / MyApplication.Scal_to_Covert5);
+			}
+			converter.coord(sourceLatLng);
+			desLatLng1 = converter.convert();
+
+
+		}
 	}
 	
 	

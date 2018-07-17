@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.sql.Timestamp;
 import java.text.Format;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +34,7 @@ import com.liu.Class.joinresponse;
 import com.liu.Class.leave;
 import com.liu.Class.request;
 import com.liu.Class.selfadjust;
+import com.liu.Class.vehicle;
 import com.main.TCPService.TCPService;
 import com.main.activity.MyApplication;
 import com.main.activity.OverlayDemo;
@@ -109,6 +111,9 @@ public class Client extends Thread {
     
     private JSONObject json_motorcadelist = null;
 
+    private Boolean isFirstLog = true;//记录是否是否第一记录log
+	private long logTime = 0;
+
 	public Client(Socket s, Context c) {
 		this.socket = s;
 		this.context = c;
@@ -131,7 +136,6 @@ public class Client extends Thread {
 		ExecutorService fixedThreadPool = Executors.newFixedThreadPool(5);
 		try {
 			while ((matches = br.readLine()) != null) {
-
 				Log.v(TAG, "从Mk5接受到的信息为：" + matches);
 				fixedThreadPool.execute(command);
 
@@ -482,17 +486,8 @@ public class Client extends Thread {
 		if (TCPService.Flag_Connection_MK5 == false) {// 如果与MK5连接中断，则要清车辆
 			Other_Car_map.clear();
 		}
-		
-		if (jsonObject.has("Lat_Local")) {
-			idLocal = jsonObject.getInt("ID");
-			LongLocalNumber = jsonObject.getInt("Long_Local");
-			LatLocalNumber = jsonObject.getInt("Lat_Local");
-			
-			MyApplication.isMk5LatLng = true;
 
-			Log.w(TAG, "parseJson: mk5已经连接，接收到其经纬度为+"+LongLocalNumber+"+"+LatLocalNumber );
-		}
-		
+
 		// obd data 解析 wangyonglong
 		if (jsonObject.has("VBAT")) {
 			MyApplication.OBDFlag_display = true;
@@ -551,9 +546,9 @@ public class Client extends Thread {
 
 		}
 
-		if (jsonObject.has("VIN")) {// 自身车辆的ID号码？
-			Log.i(TAG, "收到MK5 传过来的 VIN！");
-		}
+//		if (jsonObject.has("VIN")) {// 自身车辆的ID号码？
+//			Log.i(TAG, "收到MK5 传过来的 VIN！");
+//		}
 
 		/*
 		 * 心跳信息接收
@@ -568,24 +563,6 @@ public class Client extends Thread {
 			this.clientID = clientID;
 			Log.i(TAG, "[clientID]: " + this.clientID + "!!");
 			
-		}
-
-		/*
-		 * 删除指定的ID
-		 */
-		if (jsonObject.has("deleteID")) {// 删除接受到的
-											// mk5的id//删除附近的车辆，让它不在UI上显示车辆的位置
-			int deleteid = jsonObject.getInt("deleteID");
-		    if (OverlayDemo.addMarkerFromMk5.containsKey(deleteid)) {
-		    	Intent intent = new Intent("com.liu.client.deleteid");
-		    	intent.putExtra("deletedId", deleteid);
-		    	MyApplication.getcontext().sendBroadcast(intent);
-		    	Log.i(TAG, "deleteId always in addMarkerFrom Mk5 ---------------");
-		    }
-		    Log.i(TAG, "deleteId is ---------" + deleteid);
-//			if (Other_Car_map.containsKey(deleteid)) {
-//				Other_Car_map.remove(deleteid);
-//			}
 		}
 		
 		if (jsonObject.has("addID")) {// 添加id，
@@ -614,25 +591,39 @@ public class Client extends Thread {
 			}
 		}
 
-		// 防撞预警——张卓鹏测试使用
-		if (jsonObject.has("Scene")) {// 代表防撞预警模式和等级
-			MyApplication.MK5CarwarnningReciveTime = System.currentTimeMillis();
-			MyApplication.MK5Scene = jsonObject.getInt("Scene");
-			Log.i(TAG, "Scene-->" + MyApplication.MK5Scene);
-		}
+
 
 		/*
-		 * MK5消息通过 msgID 来管理，包括 ACM、BSM
+		 * MK5消息通过 msgID 来管理
 		 */
 
 		if (jsonObject.has("msgID")) {
+            int logId = jsonObject.getInt("msgID");
+            MyApplication.logHM.put(logId,logId);
+			if (isFirstLog) {
+				isFirstLog = false;
+				logTime = System.currentTimeMillis();
+			}
+			if (logTime != 0 && (System.currentTimeMillis() - logTime >= 5000)) {
+				Intent intent = new Intent("com.liu.client.logText");
+				intent.putExtra("log", MyApplication.logHM);
+				MyApplication.getcontext().sendBroadcast(intent);
+				MyApplication.logHM.clear();
+				isFirstLog = true;
+				logTime = 0;
+			}
+
 			switch ((short) jsonObject.getInt("msgID")) {
 			case 0:
-				if (jsonObject.has("Scene")) {
-					MyApplication.highPriorityReciveTime = System.currentTimeMillis();
-					MyApplication.highPriorityScene = jsonObject.getInt("Scene");
-                    MyApplication.highPriorityDistance = jsonObject.getInt("Distance");
+				// 防撞预警
+				if (jsonObject.has("Scene")) {// 代表防撞预警模式和等级
+					MyApplication.MK5CarwarnningReciveTime = System.currentTimeMillis();
+					MyApplication.MK5Scene = jsonObject.getInt("Scene");
+					if (jsonObject.has("Distance")) {
+						MyApplication.Mk5SceneDistance = jsonObject.getInt("Distance");
+					}
 				}
+
 				break;
 
 			case 1:
@@ -641,7 +632,6 @@ public class Client extends Thread {
 				// （2） 聊天消息
 				// （3）紧急消息发布
 
-				
 				if (jsonObject.has("emergencyMsg")) {// 紧急消息发布
 					Log.i("lijialong5", "11111");
 					String em = jsonObject.getString("emergencyMsg");
@@ -662,32 +652,61 @@ public class Client extends Thread {
 					} else {
 						sendBroadcastString1(content);
 					}
-					break;
+
 				}
+
+				//本车的经纬度信息
+				if (jsonObject.has("Lat_Local")) {
+
+					vehicle vehmsg = new vehicle();
+					vehmsg.setId(jsonObject.getInt("ID"));
+					vehmsg.setLat(jsonObject.getInt("Lat_Local"));
+					vehmsg.setLon(jsonObject.getInt("Long_Local"));
+
+					idLocal = jsonObject.getInt("ID");
+//					LongLocalNumber = jsonObject.getInt("Long_Local");
+//					LatLocalNumber = jsonObject.getInt("Lat_Local");
+
+//					Client.vin = jsonObject.getInt("VIN");
+
+					MyApplication.isMk5LatLng = true;
+
+					Intent intent = new Intent("com.liu.client.locallatlon");
+					intent.putExtra("locallatlon", vehmsg);
+					MyApplication.getcontext().sendBroadcast(intent);
+				}
+
+				break;
 
 			case 2:
 				// 其他车辆的经纬度信息
 
-				// 防撞预警——张卓鹏
-				if (jsonObject.has("Scene")) {// 代表防撞预警模式和等级
-					MyApplication.MK5CarwarnningReciveTime = System.currentTimeMillis();
-					MyApplication.MK5Scene = jsonObject.getInt("Scene");
-					Log.i(TAG, "Scene-->" + MyApplication.MK5Scene);
+				if (jsonObject.has("ID")) {
+					int key = jsonObject.getInt("ID");
+
+					Car_Data data = new Car_Data();
+					data.lat = jsonObject.getInt("Lat_Rcv");// 其他车辆纬度
+					data.longi = jsonObject.getInt("Long_Rcv");// 其他车辆经度
+					data.id = jsonObject.getInt("ID");
+					if ((data.longi > 0) && (data.lat > 0)) {
+						Other_Car_map.put(key, data);// 容错，仅吧，正的部分加入，后期还要修改
+					}
+
+					Log.w(TAG, "parseJson: 其他车辆"+data.lat);
 				}
 
-				/*
-				 * 车身信息，包括本身信息和其他车辆信息
-				 */
-				int key = jsonObject.getInt("ID");
-				
-				Log.i(TAG, "---------向Other_Car_map存储其他车辆的经纬度信息--------------" + key);
-				Car_Data data = new Car_Data();
-				data.msgID = (short) jsonObject.getInt("msgID");
-				data.lat = jsonObject.getInt("Lat_Rcv");// 其他车辆纬度
-				data.longi = jsonObject.getInt("Long_Rcv");// 其他车辆经度
-				data.id = jsonObject.getInt("ID");
-				if ((data.longi > 0) && (data.lat > 0)) {
-					Other_Car_map.put(key, data);// 容错，仅吧，正的部分加入，后期还要修改
+				//删除远离的车辆信息图标
+				if (jsonObject.has("deleteID")) {
+					int deleteID = jsonObject.getInt("deleteID");
+					if (Other_Car_map.containsKey(deleteID)) {
+						Other_Car_map.remove(deleteID);
+					}
+
+					if (OverlayDemo.addMarkerFromMk5.containsKey(deleteID)) {
+						Intent intent = new Intent("com.liu.client.deleteid");
+						intent.putExtra("deletedId", deleteID);
+						MyApplication.getcontext().sendBroadcast(intent);
+					}
 				}
 
 				break;
@@ -699,22 +718,31 @@ public class Client extends Thread {
 					//交通灯和建议车速信息  currentState 为红绿灯的状态，为数字1、2、3。“3”是红灯状态；“2”是黄灯状态；“1”是绿灯状态
 					MyApplication.lightState = jsonObject.getInt("CurrentState");
 					MyApplication.lightRemainTime = jsonObject.getInt("TimeRemain");
-					MyApplication.adviseSpeed = jsonObject.getInt("Speed_Adv");
+					if (jsonObject.has("Speed_Adv")){
+                        MyApplication.adviseSpeed = jsonObject.getInt("Speed_Adv");
+                    }
 					if (jsonObject.has("RedLight")) {
                         MyApplication.redLight = jsonObject.getInt("RedLight");
+					}
+					if (jsonObject.has("Pass")) {
+						MyApplication.Pass = jsonObject.getInt("Pass");
 					}
 					MyApplication.TrafficLightReciveTime = System.currentTimeMillis();
 				}
 
 				//道路危险
 				if (jsonObject.has("VDanger")) {
-					MyApplication.danger = jsonObject.getInt("VDagner");
-					MyApplication.dangerReciveTime = System.currentTimeMillis();
+					MyApplication.danger = jsonObject.getInt("VDanger");
 				}
 
 				//限速
 				if (jsonObject.has("VLimit")) {
+					MyApplication.limitSpeed = jsonObject.getInt("VLimit");
+				}
 
+				//车内标牌
+				if (jsonObject.has("VSign")) {
+					MyApplication.VSign = jsonObject.getInt("VSign");
 				}
 
 				break;
@@ -757,10 +785,6 @@ public class Client extends Thread {
 				break;
 
 			}
-		}
-
-		if (jsonObject.has("vin")) {
-			Client.vin = jsonObject.getInt("vin");
 		}
 
 	}
